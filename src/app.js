@@ -3,7 +3,7 @@ import cors from 'cors';
 import express from 'express';
 import morgan from 'morgan';
 
-import { SignupRoutes, SigninRoutes } from './controllers';
+import { SignupRoutes, SigninRoutes, SigninToken } from './controllers';
 import passport, { generateToken } from './middlewares/authentication';
 
 const app = express();
@@ -21,6 +21,12 @@ app.use(
   }),
   generateToken,
   SigninRoutes(),
+);
+
+app.use(
+  '/signin-with-token',
+  passport.authenticate('jwt', { session: false }),
+  SigninToken(),
 );
 
 export default app;
