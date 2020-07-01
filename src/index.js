@@ -11,7 +11,6 @@ import {
 const port = process.env.PORT || 3000
 
 let server
-logger.info(DB_URL)
 
 mongoose.connect(DB_URL, {
   useNewUrlParser: true,
