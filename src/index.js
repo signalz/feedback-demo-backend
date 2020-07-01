@@ -11,10 +11,12 @@ import {
 const port = process.env.PORT || 3000
 
 let server
+logger.info(DB_URL)
 
 mongoose.connect(DB_URL, {
   useNewUrlParser: true,
-  useUnifiedTopology: true
+  useUnifiedTopology: true,
+  useCreateIndex: true
 }).then(() => {
   logger.info('Connected to MongoDB');
   app.get('/', (req, res) => res.send('Hello World!'))
@@ -22,7 +24,7 @@ mongoose.connect(DB_URL, {
   server = app.listen(port, () => {
     logger.info(`Listening to port ${port}`);
   });
-});
+}).catch(unexpectedErrorHandler);
 
 const exitHandler = () => {
   if (server) {
