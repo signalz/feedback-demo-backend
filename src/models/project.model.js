@@ -3,7 +3,9 @@ import { mongoose } from './db'
 const schema = mongoose.Schema({
   projectName: {
     type: String,
-    index: true
+    index: true,
+    unique: true,
+    required: true
   },
   startDate: {
     type: Date,
