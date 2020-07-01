@@ -1,7 +1,10 @@
 import { mongoose } from './db'
 
 const schema = mongoose.Schema({
-  projectName: String,
+  projectName: {
+    type: String,
+    index: true
+  },
   startDate: {
     type: Date,
     default: Date.now
