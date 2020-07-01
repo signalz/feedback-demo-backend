@@ -1,12 +1,7 @@
-import { mongoose } from './db'
+import mongoose from 'mongoose'
 
 const schema = new mongoose.Schema({
-  projectName: {
-    type: String,
-    index: true,
-    unique: true,
-    required: true
-  },
+  name: String,
   startDate: {
     type: Date,
     default: Date.now
@@ -34,6 +29,4 @@ schema.method("toJSON", () => {
   return object
 })
 
-const Project = mongoose.model("Project", schema)
-
-export default Project
+export const Project = mongoose.model("Project", schema)

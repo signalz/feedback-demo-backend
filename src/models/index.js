@@ -1,5 +1,1 @@
-import Project from './project.model'
-
-export default {
-  Project
-}
+export * from './project.model'
