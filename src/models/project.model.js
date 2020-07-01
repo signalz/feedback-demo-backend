@@ -1,6 +1,6 @@
 import { mongoose } from './db'
 
-const schema = mongoose.Schema({
+const schema = new mongoose.Schema({
   projectName: {
     type: String,
     index: true,
