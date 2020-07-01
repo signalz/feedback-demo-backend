@@ -13,9 +13,11 @@ const schema = mongoose.Schema({
   customer: String,
   domain: String
 }, {
-  timestamps: true
+  timestamps: true,
+  autoCreate: true
 })
-schema.method("toJSON", function () {
+
+schema.method("toJSON", () => {
   const {
     __v,
     _id,
