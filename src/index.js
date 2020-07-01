@@ -1,4 +1,6 @@
-import mongoose from 'mongoose'
+import {
+  mongoose
+} from './models/db'
 
 import app from './app'
 import {
