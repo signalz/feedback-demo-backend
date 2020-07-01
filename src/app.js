@@ -3,12 +3,24 @@ import cors from 'cors';
 import express from 'express';
 import morgan from 'morgan';
 
-const app = express()
+import { SignupRoutes, SigninRoutes } from './controllers';
+import passport, { generateToken } from './middlewares/authentication';
+
+const app = express();
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cors());
 app.use(morgan('dev'));
 
+app.use('/signup', SignupRoutes());
+app.use(
+  '/signin',
+  passport.authenticate('local', {
+    session: false,
+  }),
+  generateToken,
+  SigninRoutes(),
+);
 
-export default app
+export default app;
