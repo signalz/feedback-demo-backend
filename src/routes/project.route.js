@@ -13,6 +13,7 @@ const projectObj = Joi.object({
   customer: Joi.string(),
   domain: Joi.string(),
   manager: Joi.string(),
+  surveyId: Joi.string(),
 });
 const projectArr = Joi.array().items(projectObj);
 

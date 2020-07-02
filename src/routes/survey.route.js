@@ -39,6 +39,7 @@ const routes = () => {
       });
       res.status(HttpStatus.OK).send({
         description: survey.description,
+        id: survey._id,
         sections: survey.sections.map((section) => ({
           id: section._id,
           title: section.title,
