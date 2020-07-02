@@ -4,6 +4,7 @@ import express from 'express';
 import morgan from 'morgan';
 
 import {
+  FeedbackRoutes,
   ProjectRoutes,
   QuestionRoutes,
   SectionRoutes,
@@ -35,10 +36,12 @@ app.use('/signin-with-token', passport.authenticate('jwt', { session: false }), 
 
 app.use('/api/projects', passport.authenticate('jwt', { session: false }), ProjectRoutes());
 
-app.use('/api/questions', QuestionRoutes());
+app.use('/api/questions', passport.authenticate('jwt', { session: false }), QuestionRoutes());
 
-app.use('/api/sections', SectionRoutes());
+app.use('/api/sections', passport.authenticate('jwt', { session: false }), SectionRoutes());
 
-app.use('/api/surveys', SurveyRoutes());
+app.use('/api/surveys', passport.authenticate('jwt', { session: false }), SurveyRoutes());
+
+app.use('/api/feedbacks', passport.authenticate('jwt', { session: false }), FeedbackRoutes());
 
 export default app;

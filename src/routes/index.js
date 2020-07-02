@@ -1,3 +1,4 @@
+export { default as FeedbackRoutes } from './feedback.route';
 export { default as ProjectRoutes } from './project.route';
 export { default as QuestionRoutes } from './question.route';
 export { default as SectionRoutes } from './section.route';
