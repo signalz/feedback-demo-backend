@@ -25,6 +25,6 @@ app.use(
 
 app.use('/signin-with-token', passport.authenticate('jwt', { session: false }), SigninToken());
 
-app.use('api/projects', ProjectRoutes());
+app.use('/api/projects', ProjectRoutes());
 
 export default app;
