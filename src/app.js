@@ -3,7 +3,7 @@ import cors from 'cors';
 import express from 'express';
 import morgan from 'morgan';
 
-import { SignupRoutes, SigninRoutes, SigninToken } from './controllers';
+import { SignupRoutes, SigninRoutes, SigninToken } from './routes';
 import passport, { generateToken } from './middlewares/authentication';
 
 const app = express();
