@@ -46,8 +46,8 @@ app.use('/api/surveys', passport.authenticate('jwt', { session: false }), Survey
 
 app.use('/api/feedbacks', passport.authenticate('jwt', { session: false }), FeedbackRoutes());
 
-app.use('/projects/summary', passport.authenticate('jwt', { session: false }), OverviewDashboardRoutes());
+app.use('/api/dashboard/projects/summary', passport.authenticate('jwt', { session: false }), OverviewDashboardRoutes());
 
-app.use('/projects/history', passport.authenticate('jwt', { session: false }), HistoryDashboardRoutes());
+app.use('/api/dashboard/projects/history', passport.authenticate('jwt', { session: false }), HistoryDashboardRoutes());
 
 export default app;
