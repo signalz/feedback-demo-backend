@@ -50,20 +50,22 @@ const routes = () => {
           const promiseArray = [];
           /* eslint-disable */
           ratings.map((rating) =>
-            rating.questions.map((question) =>
-              promiseArray.concat(
-                Rating.create({
-                  userId,
-                  projectId,
-                  feedbackId: newFeedback._id,
-                  customer: project.customer,
-                  domain: project.domain,
-                  sectionId: rating.sectionId,
-                  questionId: question.questionId,
-                  rate: question.rating,
-                }),
-              ),
-            ),
+            rating.questions.map((question) => {
+              if (question.rating) {
+                promiseArray.concat(
+                  Rating.create({
+                    userId,
+                    projectId,
+                    feedbackId: newFeedback._id,
+                    customer: project.customer,
+                    domain: project.domain,
+                    sectionId: rating.sectionId,
+                    questionId: question.questionId,
+                    rating: question.rating,
+                  }),
+                );
+              }
+            }),
           );
           /* eslint-enable */
           Promise.all(promiseArray)
@@ -103,23 +105,24 @@ const routes = () => {
         },
       );
       if (!feedback) {
-        res.status(HttpStatus.NOT_FOUND).send({
+        res.status(HttpStatus.OK).send({
           message: `Not found Feedback with surveyId ${surveyId}, projectId ${projectId} and userId ${userId}`,
         });
       } else {
         const ratings = await Rating.find({ projectId, userId, feedbackId: feedback.id });
-        const sectionIds = [...new Set(ratings.map((rating) => rating.sectionId))];
+        const sectionIds = [...new Set(ratings.map((rating) => rating.sectionId.toString()))];
         const sections = sectionIds.map((section) => ({ sectionId: section, questions: [] }));
 
         ratings.forEach((rating) => {
           sections.forEach((section) => {
-            if (section.sectionId === rating.sectionId) {
+            if (section.sectionId === rating.sectionId.toString()) {
               section.questions.push({ questionId: rating.questionId, rating: rating.rating });
             }
           });
         });
 
         res.status(HttpStatus.OK).json({
+          id: feedback.id,
           review: feedback.review,
           event: feedback.event,
           ratings: sections,
