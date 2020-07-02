@@ -5,6 +5,7 @@ import morgan from 'morgan';
 
 import {
   FeedbackRoutes,
+  OverviewDashboardRoutes,
   ProjectRoutes,
   QuestionRoutes,
   SectionRoutes,
@@ -43,5 +44,7 @@ app.use('/api/sections', passport.authenticate('jwt', { session: false }), Secti
 app.use('/api/surveys', passport.authenticate('jwt', { session: false }), SurveyRoutes());
 
 app.use('/api/feedbacks', passport.authenticate('jwt', { session: false }), FeedbackRoutes());
+
+app.use('/projects/summary', passport.authenticate('jwt', { session: false }), OverviewDashboardRoutes());
 
 export default app;
