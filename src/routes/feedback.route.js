@@ -92,7 +92,7 @@ const routes = () => {
 
   router.get('/', async (req, res) => {
     const userId = req.user._id;
-    const { projectId, surveyId } = req.params;
+    const { projectId, surveyId } = req.query;
 
     try {
       const feedback = await Feedback.findOne(
