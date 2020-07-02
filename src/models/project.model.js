@@ -13,6 +13,8 @@ const schema = new mongoose.Schema(
     },
     customer: String,
     domain: String,
+    manager: String,
+    surveyId: { type: mongoose.Schema.Types.ObjectId, ref: 'Survey' },
   },
   {
     timestamps: true,
@@ -21,13 +23,7 @@ const schema = new mongoose.Schema(
 );
 
 schema.method('toJSON', () => {
-  const {
-    __v,
-    _id,
-    createdAt,
-    updatedAt,
-    ...object
-  } = this.toObject();
+  const { __v, _id, createdAt, updatedAt, ...object } = this.toObject();
   object.id = _id;
   return object;
 });
