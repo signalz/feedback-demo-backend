@@ -4,6 +4,7 @@ import express from 'express';
 import HttpStatus from 'http-status-codes';
 
 import { BCRYPT_SALT } from '../config';
+import { BAD_REQUEST, INTERNAL_SERVER_ERROR } from '../constants';
 import { User } from '../models';
 import { logger } from '../utils';
 
@@ -25,19 +26,19 @@ const routes = () => {
             password: bcrypt.hashSync(user.password, BCRYPT_SALT),
           });
           res.status(HttpStatus.OK).json({
-            a: '123',
+            message: 'Sign up successful',
           });
         } catch (err) {
           logger.error(err);
-          res.status(HttpStatus.BAD_REQUEST).json({
-            message: 'Bad request',
+          res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+            message: INTERNAL_SERVER_ERROR,
           });
         }
       })
       .catch((e) => {
         logger.error(e);
         res.status(HttpStatus.BAD_REQUEST).json({
-          message: 'Bad request',
+          message: BAD_REQUEST,
         });
       });
   });

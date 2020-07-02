@@ -22,7 +22,7 @@ const schema = new mongoose.Schema(
   },
 );
 
-schema.method('toJSON', () => {
+schema.method('toJSON', function () {
   const { __v, _id, createdAt, updatedAt, ...object } = this.toObject();
   object.id = _id;
   return object;

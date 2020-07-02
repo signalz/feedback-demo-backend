@@ -4,6 +4,7 @@ import mongoose from 'mongoose';
 import app from './app';
 import { DB_URL } from './config';
 import { logger } from './utils';
+// import { Project } from './models';
 
 const port = process.env.PORT || 3000;
 let server;
@@ -32,6 +33,7 @@ mongoose
   })
   .then(() => {
     logger.info('Connected to MongoDB');
+    // Project.create({ name: 'test' });
     app.get('/', (req, res) => res.send('Hello World!'));
 
     server = app.listen(port, () => {
