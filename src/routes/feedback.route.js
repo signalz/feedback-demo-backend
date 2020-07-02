@@ -90,6 +90,47 @@ const routes = () => {
       });
   });
 
+  router.get('/', async (req, res) => {
+    const userId = req.user._id;
+    const { projectId, surveyId } = req.params;
+
+    try {
+      const feedback = await Feedback.findOne(
+        { surveyId, projectId, userId },
+        {},
+        {
+          sort: { createdAt: -1 },
+        },
+      );
+      if (!feedback) {
+        res.status(HttpStatus.NOT_FOUND).send({
+          message: `Not found Feedback with surveyId ${surveyId}, projectId ${projectId} and userId ${userId}`,
+        });
+      } else {
+        const ratings = await Rating.find({ projectId, userId, feedbackId: feedback.id });
+        const sectionIds = [...new Set(ratings.map((rating) => rating.sectionId))];
+        const sections = sectionIds.map((section) => ({ sectionId: section, questions: [] }));
+
+        ratings.forEach((rating) => {
+          sections.forEach((section) => {
+            if (section.sectionId === rating.sectionId) {
+              section.questions.push({ questionId: rating.questionId, rating: rating.rating });
+            }
+          });
+        });
+
+        res.status(HttpStatus.OK).json({
+          review: feedback.review,
+          event: feedback.event,
+          ratings: sections,
+        });
+      }
+    } catch (err) {
+      logger.error(err);
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: INTERNAL_SERVER_ERROR });
+    }
+  });
+
   return router;
 };
 
