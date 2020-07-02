@@ -8,7 +8,7 @@ import { logger } from '../utils';
 
 const routes = () => {
   const router = express.Router();
-  router.get('/', async (req, res) => {
+  router.post('/', async (req, res) => {
     const { customer, domain, projectId, sectionId } = req.body;
 
     const matchOpts = {};
