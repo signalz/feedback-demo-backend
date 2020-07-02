@@ -3,25 +3,22 @@ import express from 'express';
 import HttpStatus from 'http-status-codes';
 
 import { BAD_REQUEST, INTERNAL_SERVER_ERROR } from '../constants';
-import { Project } from '../models';
+import { Section } from '../models';
 import { logger } from '../utils';
 
-const projectObj = Joi.object({
-  name: Joi.string().required(),
-  startDate: Joi.string(),
-  endDate: Joi.string(),
-  customer: Joi.string(),
-  domain: Joi.string(),
-  manager: Joi.string(),
+const sectionObj = Joi.object({
+  title: Joi.string().required(),
+  order: Joi.number(),
+  questions: Joi.array().items(Joi.string()),
 });
-const projectArr = Joi.array().items(projectObj);
+const sectionsArr = Joi.array().items(sectionObj);
 
 const routes = () => {
   const router = express.Router();
   router.get('/', async (req, res) => {
     try {
-      const projects = await Project.find({});
-      res.status(HttpStatus.OK).send(projects);
+      const sections = await Section.find({});
+      res.status(HttpStatus.OK).send(sections);
     } catch (e) {
       logger.error(e);
       res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
@@ -33,23 +30,23 @@ const routes = () => {
   router.get('/:id', async (req, res) => {
     const { id } = req.params;
     try {
-      const project = await Project.findOne({ _id: id });
-      res.status(HttpStatus.OK).send(project);
+      const section = await Section.findOne({ _id: id });
+      res.status(HttpStatus.OK).send(section);
     } catch (e) {
       logger.error(e);
       res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-        message: `${INTERNAL_SERVER_ERROR} with project ${id}`,
+        message: `${INTERNAL_SERVER_ERROR} with section ${id}`,
       });
     }
   });
 
   router.post('/', async (req, res) => {
-    projectArr
+    sectionsArr
       .validateAsync(req.body)
-      .then(async (projects) => {
+      .then(async (sections) => {
         try {
-          const createdProjects = await Project.create(projects);
-          res.status(HttpStatus.OK).send(createdProjects);
+          const createdSections = await Section.create(sections);
+          res.status(HttpStatus.OK).send(createdSections);
         } catch (err) {
           logger.error(err);
           res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
@@ -67,17 +64,19 @@ const routes = () => {
 
   router.patch('/:id', async (req, res) => {
     const { id } = req.params;
-    projectObj
+    sectionObj
       .validateAsync(req.body)
-      .then(async (project) => {
+      .then(async (question) => {
         try {
-          const update = await Project.findByIdAndUpdate(id, project, { useFindAndModify: false });
+          const update = await Section.findByIdAndUpdate(id, question, {
+            useFindAndModify: false,
+          });
           if (!update) {
             res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
               message: INTERNAL_SERVER_ERROR,
             });
           } else {
-            res.status(HttpStatus.OK).send({ message: 'Project was updated successfully.' });
+            res.status(HttpStatus.OK).send({ message: 'Section was updated successfully.' });
           }
         } catch (err) {
           logger.error(err);
@@ -97,13 +96,13 @@ const routes = () => {
   router.delete('/:id', async (req, res) => {
     const { id } = req.params;
     try {
-      const data = await Project.deleteOne(id, { useFindAndModify: false });
+      const data = await Section.deleteOne(id, { useFindAndModify: false });
       if (!data) {
         res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
           message: INTERNAL_SERVER_ERROR,
         });
       } else {
-        res.status(HttpStatus.OK).send({ message: 'Project was deleted successfully.' });
+        res.status(HttpStatus.OK).send({ message: 'Section was deleted successfully.' });
       }
     } catch (err) {
       logger.error(err);

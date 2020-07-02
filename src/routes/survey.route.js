@@ -3,25 +3,22 @@ import express from 'express';
 import HttpStatus from 'http-status-codes';
 
 import { BAD_REQUEST, INTERNAL_SERVER_ERROR } from '../constants';
-import { Project } from '../models';
+import { Survey } from '../models';
 import { logger } from '../utils';
 
-const projectObj = Joi.object({
-  name: Joi.string().required(),
+const surveyObj = Joi.object({
+  description: Joi.string().required(),
   startDate: Joi.string(),
   endDate: Joi.string(),
-  customer: Joi.string(),
-  domain: Joi.string(),
-  manager: Joi.string(),
+  sections: Joi.array().items(Joi.string()),
 });
-const projectArr = Joi.array().items(projectObj);
 
 const routes = () => {
   const router = express.Router();
   router.get('/', async (req, res) => {
     try {
-      const projects = await Project.find({});
-      res.status(HttpStatus.OK).send(projects);
+      const surveys = await Survey.find({});
+      res.status(HttpStatus.OK).send(surveys);
     } catch (e) {
       logger.error(e);
       res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
@@ -33,23 +30,41 @@ const routes = () => {
   router.get('/:id', async (req, res) => {
     const { id } = req.params;
     try {
-      const project = await Project.findOne({ _id: id });
-      res.status(HttpStatus.OK).send(project);
+      const survey = await Survey.findOne({ _id: id }).populate({
+        path: 'sections',
+        populate: {
+          path: 'questions',
+          model: 'Question',
+        },
+      });
+      res.status(HttpStatus.OK).send({
+        description: survey.description,
+        sections: survey.sections.map((section) => ({
+          id: section._id,
+          title: section.title,
+          order: section.order,
+          questions: section.questions.map((question) => ({
+            id: question._id,
+            text: question.text,
+            order: question.order,
+          })),
+        })),
+      });
     } catch (e) {
       logger.error(e);
       res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-        message: `${INTERNAL_SERVER_ERROR} with project ${id}`,
+        message: `${INTERNAL_SERVER_ERROR} with survey ${id}`,
       });
     }
   });
 
   router.post('/', async (req, res) => {
-    projectArr
+    surveyObj
       .validateAsync(req.body)
-      .then(async (projects) => {
+      .then(async (survey) => {
         try {
-          const createdProjects = await Project.create(projects);
-          res.status(HttpStatus.OK).send(createdProjects);
+          const createdSurvey = await Survey.create(survey);
+          res.status(HttpStatus.OK).send(createdSurvey);
         } catch (err) {
           logger.error(err);
           res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
@@ -67,17 +82,19 @@ const routes = () => {
 
   router.patch('/:id', async (req, res) => {
     const { id } = req.params;
-    projectObj
+    surveyObj
       .validateAsync(req.body)
-      .then(async (project) => {
+      .then(async (question) => {
         try {
-          const update = await Project.findByIdAndUpdate(id, project, { useFindAndModify: false });
+          const update = await Survey.findByIdAndUpdate(id, question, {
+            useFindAndModify: false,
+          });
           if (!update) {
             res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
               message: INTERNAL_SERVER_ERROR,
             });
           } else {
-            res.status(HttpStatus.OK).send({ message: 'Project was updated successfully.' });
+            res.status(HttpStatus.OK).send({ message: 'Survey was updated successfully.' });
           }
         } catch (err) {
           logger.error(err);
@@ -97,13 +114,13 @@ const routes = () => {
   router.delete('/:id', async (req, res) => {
     const { id } = req.params;
     try {
-      const data = await Project.deleteOne(id, { useFindAndModify: false });
+      const data = await Survey.deleteOne(id, { useFindAndModify: false });
       if (!data) {
         res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
           message: INTERNAL_SERVER_ERROR,
         });
       } else {
-        res.status(HttpStatus.OK).send({ message: 'Project was deleted successfully.' });
+        res.status(HttpStatus.OK).send({ message: 'Survey was deleted successfully.' });
       }
     } catch (err) {
       logger.error(err);

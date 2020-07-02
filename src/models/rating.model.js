@@ -9,7 +9,7 @@ const schema = Schema(
     questionId: { type: Schema.Types.ObjectId, ref: 'Question' },
     customer: String,
     domain: String,
-    rating: { type: Number, required: true, min: 0, max: 4 },
+    rating: { type: Number, min: 1, max: 4 },
   },
   { timestamps: true },
 );

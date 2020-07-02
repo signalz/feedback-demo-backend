@@ -2,10 +2,11 @@ import mongoose, { Schema } from 'mongoose';
 
 const schema = Schema(
   {
-    userId: String,
+    userId: { type: Schema.Types.ObjectId, ref: 'User' },
     surveyId: { type: Schema.Types.ObjectId, ref: 'Survey' },
     projectId: { type: Schema.Types.ObjectId, ref: 'Project' },
     review: String,
+    event: String,
   },
   { timestamps: true },
 );
