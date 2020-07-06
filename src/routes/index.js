@@ -8,3 +8,4 @@ export { default as SigninToken } from './signin-token.route';
 export { default as SignupRoutes } from './signup.route';
 export { default as SigninRoutes } from './signin.route';
 export { default as SurveyRoutes } from './survey.route';
+export { default as UserRoutes } from './user.route';

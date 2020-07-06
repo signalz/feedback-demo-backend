@@ -14,6 +14,7 @@ import {
   SigninRoutes,
   SigninToken,
   SurveyRoutes,
+  UserRoutes,
 } from './routes';
 import passport, { generateToken } from './middlewares/authentication';
 
@@ -49,5 +50,7 @@ app.use('/api/feedbacks', passport.authenticate('jwt', { session: false }), Feed
 app.use('/api/dashboard/projects/summary', passport.authenticate('jwt', { session: false }), OverviewDashboardRoutes());
 
 app.use('/api/dashboard/projects/history', passport.authenticate('jwt', { session: false }), HistoryDashboardRoutes());
+
+app.use('/api/users', passport.authenticate('jwt', { session: false }), UserRoutes());
 
 export default app;
