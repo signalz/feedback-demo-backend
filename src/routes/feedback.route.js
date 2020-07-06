@@ -9,8 +9,8 @@ import { logger } from '../utils';
 const schema = Joi.object({
   surveyId: Joi.string().required(),
   projectId: Joi.string().required(),
-  review: Joi.string(),
-  event: Joi.string(),
+  review: Joi.string().optional(),
+  event: Joi.string().optional(),
   ratings: Joi.array().items(
     Joi.object({
       sectionId: Joi.string(),
