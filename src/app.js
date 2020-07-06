@@ -25,7 +25,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cors());
 app.use(morgan('dev'));
 
-app.use('/signup', SignupRoutes());
+app.use('/signup', passport.authenticate('jwt', { session: false }), SignupRoutes());
 app.use(
   '/signin',
   passport.authenticate('local', {
@@ -47,9 +47,17 @@ app.use('/api/surveys', passport.authenticate('jwt', { session: false }), Survey
 
 app.use('/api/feedbacks', passport.authenticate('jwt', { session: false }), FeedbackRoutes());
 
-app.use('/api/dashboard/projects/summary', passport.authenticate('jwt', { session: false }), OverviewDashboardRoutes());
+app.use(
+  '/api/dashboard/projects/summary',
+  passport.authenticate('jwt', { session: false }),
+  OverviewDashboardRoutes(),
+);
 
-app.use('/api/dashboard/projects/history', passport.authenticate('jwt', { session: false }), HistoryDashboardRoutes());
+app.use(
+  '/api/dashboard/projects/history',
+  passport.authenticate('jwt', { session: false }),
+  HistoryDashboardRoutes(),
+);
 
 app.use('/api/users', passport.authenticate('jwt', { session: false }), UserRoutes());
 
