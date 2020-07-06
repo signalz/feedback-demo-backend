@@ -17,7 +17,7 @@ passport.use(
     try {
       const user = await User.findOne({
         username,
-      }).populate('roles', '-__v');
+      });
       // user existed
       if (user) {
         // compare password
@@ -47,7 +47,7 @@ passport.use(
       try {
         const user = await User.findOne({
           _id: id,
-        }).populate('roles', '-__v');
+        });
 
         if (user) {
           if (exp * 1000 < new Date().getTime()) {

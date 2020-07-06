@@ -1,6 +1,8 @@
-import mongoose from 'mongoose';
+import mongoose, { Schema } from 'mongoose';
 
-const schema = mongoose.Schema({
+import { ROLE_ADMIN, ROLE_USER } from '../config';
+
+const schema = Schema({
   username: String,
   email: String,
   password: String,
@@ -8,8 +10,9 @@ const schema = mongoose.Schema({
   lastName: String,
   roles: [
     {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Role',
+      type: String,
+      enum: [ROLE_ADMIN, ROLE_USER],
+      default: ROLE_USER,
     },
   ],
 });

@@ -1,6 +1,6 @@
-import mongoose from 'mongoose';
+import mongoose, { Schema } from 'mongoose';
 
-const schema = new mongoose.Schema(
+const schema = new Schema(
   {
     name: String,
     startDate: {
@@ -13,8 +13,9 @@ const schema = new mongoose.Schema(
     },
     customer: String,
     domain: String,
-    manager: String,
-    surveyId: { type: mongoose.Schema.Types.ObjectId, ref: 'Survey' },
+    manager: { type: Schema.Types.ObjectId, ref: 'User' },
+    associates: [{ type: Schema.Types.ObjectId, ref: 'User' }],
+    surveyId: { type: Schema.Types.ObjectId, ref: 'Survey' },
   },
   {
     timestamps: true,
