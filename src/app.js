@@ -25,7 +25,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cors());
 app.use(morgan('dev'));
 
-app.use('/signup', SignupRoutes());
+app.use('/signup', passport.authenticate('jwt', { session: false }), SignupRoutes());
 app.use(
   '/signin',
   passport.authenticate('local', {
