@@ -1,6 +1,6 @@
 import mongoose, { Schema } from 'mongoose';
 
-const schema = new Schema(
+const schema = Schema(
   {
     name: String,
     startDate: {

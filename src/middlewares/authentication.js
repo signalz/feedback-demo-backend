@@ -17,7 +17,7 @@ passport.use(
     try {
       const user = await User.findOne({
         username,
-      });
+      }).select(['-__v']);
       // user existed
       if (user) {
         // compare password

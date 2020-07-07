@@ -3,7 +3,10 @@ import mongoose, { Schema } from 'mongoose';
 import { ROLE_ADMIN, ROLE_USER } from '../config';
 
 const schema = Schema({
-  username: String,
+  username: {
+    type: String,
+    unique: true,
+  },
   email: String,
   password: String,
   firstName: String,
@@ -15,6 +18,12 @@ const schema = Schema({
       default: ROLE_USER,
     },
   ],
+});
+
+schema.method('toJSON', function () {
+  const { __v, _id, createdAt, updatedAt, ...object } = this.toObject();
+  object.id = _id;
+  return object;
 });
 
 const User = mongoose.model('User', schema);
