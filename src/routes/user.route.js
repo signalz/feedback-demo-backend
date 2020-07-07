@@ -3,7 +3,7 @@ import bcrypt from 'bcryptjs';
 import express from 'express';
 import HttpStatus from 'http-status-codes';
 
-import { BCRYPT_SALT, ROLE_ADMIN, ROLE_USER } from '../config';
+import { BCRYPT_SALT, ROLE_ADMIN, ROLE_SUPER_ADMIN, ROLE_USER } from '../config';
 import { BAD_REQUEST, FORBIDDEN, INTERNAL_SERVER_ERROR } from '../constants';
 import { User } from '../models';
 import { logger, isAdmin } from '../utils';
@@ -31,6 +31,7 @@ const routes = () => {
               firstName: user.firstName,
               lastName: user.lastName,
               password: bcrypt.hashSync(user.password, BCRYPT_SALT),
+              roles: user.roles,
             });
             res.status(HttpStatus.OK).json({
               message: 'User is created successfully',
@@ -77,11 +78,18 @@ const routes = () => {
     if (isAdmin(req.user)) {
       try {
         const { id } = req.params;
-
-        await User.deleteOne({ _id: id });
-        res.status(HttpStatus.OK).json({
-          message: 'User is deleted successfully',
-        });
+        const user = await User.findById(id);
+        // DO NOT DELETE the root user
+        if (user.roles.includes(ROLE_SUPER_ADMIN)) {
+          res.status(HttpStatus.FORBIDDEN).json({
+            message: FORBIDDEN,
+          });
+        } else {
+          await User.deleteOne({ _id: id });
+          res.status(HttpStatus.OK).json({
+            message: 'User is deleted successfully',
+          });
+        }
       } catch (e) {
         logger.error(e);
         res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
