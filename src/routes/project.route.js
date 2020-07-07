@@ -43,25 +43,32 @@ const routes = () => {
               },
             },
           ],
-        }).populate({ path: 'manager' });
+        })
+          .populate({ path: 'manager' })
+          .populate({ path: 'associates' });
       }
       res.status(HttpStatus.OK).send(
-        projects.map(({ name, id, startDate, endDate, customer, domain, manager, associates }) => ({
-          id,
-          name,
-          startDate,
-          endDate,
-          customer,
-          domain,
-          manager: {
-            firstName: manager && manager.firstName,
-            lastName: manager && manager.lastName,
-          },
-          associates: associates.map((associate) => ({
-            firstName: associate && associate.firstName,
-            lastName: associate && associate.lastName,
-          })),
-        })),
+        projects.map(
+          ({ name, id, startDate, endDate, customer, domain, manager, associates, surveyId }) => ({
+            id,
+            name,
+            startDate,
+            endDate,
+            customer,
+            domain,
+            manager: {
+              id: manager && manager.id,
+              firstName: manager && manager.firstName,
+              lastName: manager && manager.lastName,
+            },
+            associates: associates.map((associate) => ({
+              id: associate && associate.id,
+              firstName: associate && associate.firstName,
+              lastName: associate && associate.lastName,
+            })),
+            surveyId,
+          }),
+        ),
       );
     } catch (e) {
       logger.error(e);
