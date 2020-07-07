@@ -105,15 +105,23 @@ const routes = () => {
 
   router.patch('/:id', async (req, res) => {
     const { id } = req.params;
-    let { password } = req.body;
+    // let { password, roles } = req.body;
+    let { roles } = req.body;
 
     if (isAdmin(req.user) || id === req.user.id) {
-      if (password) {
-        password = bcrypt.hashSync(password, BCRYPT_SALT);
-        req.body.password = password;
-      }
+      // if (password) {
+      //   password = bcrypt.hashSync(password, BCRYPT_SALT);
+      //   req.body.password = password;
+      // }
 
       try {
+        const user = await User.findById(id);
+        if (user.roles.includes(ROLE_SUPER_ADMIN)) {
+          roles = roles.concat(ROLE_SUPER_ADMIN);
+        }
+
+        req.body.roles = [...new Set(roles)];
+
         await User.findByIdAndUpdate(
           id,
           { ...req.body },
@@ -132,6 +140,59 @@ const routes = () => {
     } else {
       res.status(HttpStatus.FORBIDDEN).json({
         message: FORBIDDEN,
+      });
+    }
+  });
+
+  // change password
+  router.put('/:id', async (req, res) => {
+    const { id } = req.params;
+    // const { password, newPassword } = req.body;
+    try {
+      if (isAdmin(req.user) || id === req.user.id) {
+        const passwordSchema = Joi.object({
+          password: Joi.string().required(),
+          newPassword: Joi.string().required(),
+          confirmNewPassword: Joi.string().required(),
+        });
+
+        passwordSchema
+          .validateAsync(req.body)
+          .then(async ({ password, newPassword, confirmNewPassword }) => {
+            if (newPassword !== confirmNewPassword) {
+              res.status(HttpStatus.BAD_REQUEST).json({
+                message: BAD_REQUEST,
+              });
+            } else {
+              const user = await User.findById(id);
+
+              if (bcrypt.compareSync(password, user.password)) {
+                await User.findByIdAndUpdate(id, {
+                  password: bcrypt.hashSync(newPassword, BCRYPT_SALT),
+                });
+                res.status(HttpStatus.OK).send({ message: 'Password was updated successfully.' });
+              } else {
+                res.status(HttpStatus.BAD_REQUEST).json({
+                  message: BAD_REQUEST,
+                });
+              }
+            }
+          })
+          .catch((error) => {
+            logger.error(error);
+            res.status(HttpStatus.BAD_REQUEST).json({
+              message: BAD_REQUEST,
+            });
+          });
+      } else {
+        res.status(HttpStatus.FORBIDDEN).json({
+          message: FORBIDDEN,
+        });
+      }
+    } catch (e) {
+      logger.error(e);
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+        message: INTERNAL_SERVER_ERROR,
       });
     }
   });
