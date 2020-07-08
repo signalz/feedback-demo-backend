@@ -45,7 +45,7 @@ const routes = () => {
           ],
         })
           .populate({ path: 'manager' })
-          .populate({ path: 'associates' });
+          .populate({ path: 'associates' }); // TODO: remove populate associates for user
       }
       res.status(HttpStatus.OK).send(
         projects.map(

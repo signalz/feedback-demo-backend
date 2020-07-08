@@ -106,8 +106,9 @@ const routes = () => {
       });
   });
 
+  // get latest feedback
   router.get('/', async (req, res) => {
-    const userId = req.user._id;
+    const userId = req.user.id;
     const { projectId, surveyId } = req.query;
 
     try {
@@ -119,7 +120,7 @@ const routes = () => {
         },
       );
       if (!feedback) {
-        res.status(HttpStatus.OK).send({
+        res.status(HttpStatus.NOT_FOUND).send({
           message: `Not found Feedback with surveyId ${surveyId}, projectId ${projectId} and userId ${userId}`,
         });
       } else {
@@ -142,6 +143,52 @@ const routes = () => {
           ratings: sections,
         });
       }
+    } catch (err) {
+      logger.error(err);
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: INTERNAL_SERVER_ERROR });
+    }
+  });
+
+  // get feedback history
+  router.get('/history', async (req, res) => {
+    const userId = req.user.id;
+    const { projectId, surveyId } = req.query;
+
+    try {
+      const feedbacks = await Feedback.find(
+        { surveyId, projectId, userId },
+        {},
+        {
+          sort: { createdAt: -1 },
+        },
+      );
+
+      Promise.all(
+        feedbacks.map(async (feedback) => {
+          const ratings = await Rating.find({ projectId, userId, feedbackId: feedback.id });
+          const sectionIds = [...new Set(ratings.map((rating) => rating.sectionId.toString()))];
+          const sections = sectionIds.map((section) => ({ sectionId: section, questions: [] }));
+
+          ratings.forEach((rating) => {
+            sections.forEach((section) => {
+              if (section.sectionId === rating.sectionId.toString()) {
+                section.questions.push({ questionId: rating.questionId, rating: rating.rating });
+              }
+            });
+          });
+
+          return {
+            id: feedback.id,
+            review: feedback.review,
+            event: feedback.event,
+            ratings: sections,
+          };
+        }),
+      )
+        .then((values) => res.status(HttpStatus.OK).send(values))
+        .catch((e) => {
+          throw new Error(e);
+        });
     } catch (err) {
       logger.error(err);
       res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: INTERNAL_SERVER_ERROR });
