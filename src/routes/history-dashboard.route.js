@@ -11,48 +11,54 @@ const routes = () => {
   router.post('/', async (req, res) => {
     const userId = req.user.id;
     const { customer, domain, projectId, sectionId } = req.body;
+    try {
+      const matchOpts = {};
+      if (projectId) {
+        const project = await Project.findById(projectId);
+        if (!project.manager && !isAdmin(req.user)) {
+          res.status(HttpStatus.FORBIDDEN).json({
+            message: FORBIDDEN,
+          });
+          return;
+        }
 
-    const matchOpts = {};
-    if (projectId) {
-      const project = await Project.findById(projectId);
-      if (
-        project.manager.toString() !== userId &&
-        !project.associates.includes(mongoose.Types.ObjectId(userId)) &&
-        !isAdmin(req.user)
-      ) {
-        res.status(HttpStatus.FORBIDDEN).json({
-          message: FORBIDDEN,
-        });
-        return;
-      }
-      matchOpts.projectId = mongoose.Types.ObjectId(projectId);
-    } else if (projectId) {
-      if (!isAdmin(req.user)) {
-        const projects = await Project.find({
-          $or: [
-            {
-              manager: mongoose.Types.ObjectId(req.user.id),
-            },
-            {
-              associates: {
-                $elemMatch: {
-                  $eq: mongoose.Types.ObjectId(req.user.id),
+        if (
+          project.manager.toString() !== userId &&
+          !project.associates.includes(mongoose.Types.ObjectId(userId)) &&
+          !isAdmin(req.user)
+        ) {
+          res.status(HttpStatus.FORBIDDEN).json({
+            message: FORBIDDEN,
+          });
+          return;
+        }
+        matchOpts.projectId = mongoose.Types.ObjectId(projectId);
+      } else if (projectId) {
+        if (!isAdmin(req.user)) {
+          const projects = await Project.find({
+            $or: [
+              {
+                manager: mongoose.Types.ObjectId(req.user.id),
+              },
+              {
+                associates: {
+                  $elemMatch: {
+                    $eq: mongoose.Types.ObjectId(req.user.id),
+                  },
                 },
               },
-            },
-          ],
-        });
+            ],
+          });
 
-        matchOpts.projectId = {
-          $in: projects.map((project) => mongoose.Types.ObjectId(project.id)),
-        };
+          matchOpts.projectId = {
+            $in: projects.map((project) => mongoose.Types.ObjectId(project.id)),
+          };
+        }
       }
-    }
-    if (customer) matchOpts.customer = customer;
-    if (domain) matchOpts.domain = domain;
-    if (sectionId) matchOpts.sectionId = mongoose.Types.ObjectId(sectionId);
+      if (customer) matchOpts.customer = customer;
+      if (domain) matchOpts.domain = domain;
+      if (sectionId) matchOpts.sectionId = mongoose.Types.ObjectId(sectionId);
 
-    try {
       const data = await Rating.aggregate([
         {
           $match: matchOpts,

@@ -11,70 +11,76 @@ const routes = () => {
   router.post('/', async (req, res) => {
     const userId = req.user.id;
     const { customer, domain, projectId, sectionId } = req.body;
+    try {
+      const matchOpts = {};
+      const groupId = {};
 
-    const matchOpts = {};
-    const groupId = {};
-
-    if (customer) {
-      matchOpts.customer = customer;
-      groupId.customer = '$customer';
-    }
-
-    if (domain) {
-      matchOpts.domain = domain;
-      groupId.domain = '$domain';
-    }
-
-    if (projectId) {
-      const project = await Project.findById(projectId);
-      if (
-        project.manager.toString() !== userId &&
-        !project.associates.includes(mongoose.Types.ObjectId(userId)) &&
-        !isAdmin(req.user)
-      ) {
-        res.status(HttpStatus.FORBIDDEN).json({
-          message: FORBIDDEN,
-        });
-        return;
+      if (customer) {
+        matchOpts.customer = customer;
+        groupId.customer = '$customer';
       }
 
-      matchOpts.projectId = mongoose.Types.ObjectId(projectId);
-      groupId.projectId = '$projectId';
-    } else if (!projectId) {
-      if (!isAdmin(req.user)) {
-        const projects = await Project.find({
-          $or: [
-            {
-              manager: mongoose.Types.ObjectId(req.user.id),
-            },
-            {
-              associates: {
-                $elemMatch: {
-                  $eq: mongoose.Types.ObjectId(req.user.id),
+      if (domain) {
+        matchOpts.domain = domain;
+        groupId.domain = '$domain';
+      }
+
+      if (projectId) {
+        const project = await Project.findById(projectId);
+        if (!project.manager && !isAdmin(req.user)) {
+          res.status(HttpStatus.FORBIDDEN).json({
+            message: FORBIDDEN,
+          });
+          return;
+        }
+
+        if (
+          project.manager.toString() !== userId &&
+          !project.associates.includes(mongoose.Types.ObjectId(userId)) &&
+          !isAdmin(req.user)
+        ) {
+          res.status(HttpStatus.FORBIDDEN).json({
+            message: FORBIDDEN,
+          });
+          return;
+        }
+
+        matchOpts.projectId = mongoose.Types.ObjectId(projectId);
+        groupId.projectId = '$projectId';
+      } else if (!projectId) {
+        if (!isAdmin(req.user)) {
+          const projects = await Project.find({
+            $or: [
+              {
+                manager: mongoose.Types.ObjectId(req.user.id),
+              },
+              {
+                associates: {
+                  $elemMatch: {
+                    $eq: mongoose.Types.ObjectId(req.user.id),
+                  },
                 },
               },
-            },
-          ],
-        });
+            ],
+          });
 
-        matchOpts.projectId = {
-          $in: projects.map((project) => mongoose.Types.ObjectId(project.id)),
-        };
+          matchOpts.projectId = {
+            $in: projects.map((project) => mongoose.Types.ObjectId(project.id)),
+          };
+        }
       }
-    }
 
-    if (sectionId) {
-      matchOpts.sectionId = mongoose.Types.ObjectId(sectionId);
-      groupId.sectionId = '$sectionId';
-    }
+      if (sectionId) {
+        matchOpts.sectionId = mongoose.Types.ObjectId(sectionId);
+        groupId.sectionId = '$sectionId';
+      }
 
-    // if (customer) groupId.customer = '$customer';
-    // if (domain) groupId.domain = '$domain';
-    // if (projectId) groupId.projectId = '$projectId';
-    // if (sectionId) groupId.sectionId = '$sectionId';
-    groupId.rating = '$rating';
+      // if (customer) groupId.customer = '$customer';
+      // if (domain) groupId.domain = '$domain';
+      // if (projectId) groupId.projectId = '$projectId';
+      // if (sectionId) groupId.sectionId = '$sectionId';
+      groupId.rating = '$rating';
 
-    try {
       const data = await Rating.aggregate([
         {
           $match: matchOpts,

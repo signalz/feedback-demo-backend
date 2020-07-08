@@ -42,6 +42,13 @@ const routes = () => {
               message: BAD_REQUEST,
             });
           } else {
+            if (!project.manager && !isAdmin(req.user)) {
+              res.status(HttpStatus.FORBIDDEN).json({
+                message: FORBIDDEN,
+              });
+              return;
+            }
+
             if (
               project.manager.toString() !== userId &&
               !project.associates.includes(mongoose.Types.ObjectId(userId)) &&
@@ -52,6 +59,7 @@ const routes = () => {
               });
               return;
             }
+
             const newFeedback = await Feedback.create({
               userId,
               surveyId,
