@@ -42,22 +42,19 @@ const routes = () => {
               message: BAD_REQUEST,
             });
           } else {
-            if (!project.manager && !isAdmin(req.user)) {
-              res.status(HttpStatus.FORBIDDEN).json({
-                message: FORBIDDEN,
-              });
-              return;
-            }
-
-            if (
-              project.manager.toString() !== userId &&
-              !project.associates.includes(mongoose.Types.ObjectId(userId)) &&
-              !isAdmin(req.user)
-            ) {
-              res.status(HttpStatus.FORBIDDEN).json({
-                message: FORBIDDEN,
-              });
-              return;
+            if (!isAdmin(req.user)) {
+              if (!project.manager) {
+                res.status(HttpStatus.FORBIDDEN).json({
+                  message: FORBIDDEN,
+                });
+              } else if (
+                project.manager.toString() !== userId &&
+                !project.associates.includes(mongoose.Types.ObjectId(userId))
+              ) {
+                res.status(HttpStatus.FORBIDDEN).json({
+                  message: FORBIDDEN,
+                });
+              }
             }
 
             const newFeedback = await Feedback.create({

@@ -15,23 +15,22 @@ const routes = () => {
       const matchOpts = {};
       if (projectId) {
         const project = await Project.findById(projectId);
-        if (!project.manager && !isAdmin(req.user)) {
-          res.status(HttpStatus.FORBIDDEN).json({
-            message: FORBIDDEN,
-          });
-          return;
+
+        if (!isAdmin(req.user)) {
+          if (!project.manager) {
+            res.status(HttpStatus.FORBIDDEN).json({
+              message: FORBIDDEN,
+            });
+          } else if (
+            project.manager.toString() !== userId &&
+            !project.associates.includes(mongoose.Types.ObjectId(userId))
+          ) {
+            res.status(HttpStatus.FORBIDDEN).json({
+              message: FORBIDDEN,
+            });
+          }
         }
 
-        if (
-          project.manager.toString() !== userId &&
-          !project.associates.includes(mongoose.Types.ObjectId(userId)) &&
-          !isAdmin(req.user)
-        ) {
-          res.status(HttpStatus.FORBIDDEN).json({
-            message: FORBIDDEN,
-          });
-          return;
-        }
         matchOpts.projectId = mongoose.Types.ObjectId(projectId);
       } else if (projectId) {
         if (!isAdmin(req.user)) {
