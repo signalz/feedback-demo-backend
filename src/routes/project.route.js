@@ -175,7 +175,7 @@ const routes = () => {
     if (isAdmin(req.user)) {
       const { id } = req.params;
       try {
-        await Project.deleteOne({ id });
+        await Project.findOneAndDelete({ _id: id });
         res.status(HttpStatus.OK).send({ message: 'Project was deleted successfully.' });
       } catch (err) {
         logger.error(err);
