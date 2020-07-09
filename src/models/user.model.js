@@ -1,13 +1,13 @@
-import mongoose, { Schema } from 'mongoose';
+import mongoose, { Schema } from 'mongoose'
 
-import { ROLE_ADMIN, ROLE_USER } from '../config';
+import { ROLE_ADMIN, ROLE_USER } from '../config'
 
 const schema = Schema({
   username: {
     type: String,
     unique: true,
   },
-  email: String,
+  // email: String,
   password: String,
   firstName: String,
   lastName: String,
@@ -18,14 +18,18 @@ const schema = Schema({
       default: ROLE_USER,
     },
   ],
-});
+  isDeleted: {
+    type: Boolean,
+    default: false,
+  },
+})
 
 schema.method('toJSON', function () {
-  const { __v, _id, createdAt, updatedAt, ...object } = this.toObject();
-  object.id = _id;
-  return object;
-});
+  const { __v, _id, createdAt, updatedAt, password, ...object } = this.toObject()
+  object.id = _id
+  return object
+})
 
-const User = mongoose.model('User', schema);
+const User = mongoose.model('User', schema)
 
-export default User;
+export default User
