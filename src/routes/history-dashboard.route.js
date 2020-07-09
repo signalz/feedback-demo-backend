@@ -32,7 +32,7 @@ const routes = () => {
         }
 
         matchOpts.projectId = mongoose.Types.ObjectId(projectId);
-      } else if (projectId) {
+      } else if (!projectId) {
         if (!isAdmin(req.user)) {
           const projects = await Project.find({
             $or: [
@@ -48,8 +48,7 @@ const routes = () => {
               },
             ],
           });
-          logger.info(req.user.username);
-          logger.info(JSON.stringify(projects));
+
           matchOpts.projectId = {
             $in: projects.map((project) => mongoose.Types.ObjectId(project.id)),
           };
