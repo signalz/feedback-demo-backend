@@ -48,7 +48,8 @@ const routes = () => {
               },
             ],
           });
-
+          logger.info(req.user.username);
+          logger.info(JSON.stringify(projects));
           matchOpts.projectId = {
             $in: projects.map((project) => mongoose.Types.ObjectId(project.id)),
           };

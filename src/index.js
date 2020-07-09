@@ -1,5 +1,4 @@
-// import '@babel/polyfill';
-// import 'core-js/stable';
+// eslint-disable-next-line
 import 'regenerator-runtime/runtime.js';
 import mongoose from 'mongoose';
 
