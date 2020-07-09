@@ -28,7 +28,8 @@ const routes = () => {
       if (isAdmin(req.user)) {
         projects = await Project.find({})
           .populate({ path: 'manager' })
-          .populate({ path: 'associates' });
+          .populate({ path: 'associates' })
+          .populate({ path: 'surveyId' });
       } else {
         projects = await Project.find({
           $or: [
@@ -45,7 +46,8 @@ const routes = () => {
           ],
         })
           .populate({ path: 'manager' })
-          .populate({ path: 'associates' }); // TODO: remove populate associates for user
+          .populate({ path: 'associates' }) // TODO: remove populate associates for user
+          .populate({ path: 'surveyId' });
       }
       res.status(HttpStatus.OK).send(
         projects.map(
@@ -66,7 +68,10 @@ const routes = () => {
               firstName: associate && associate.firstName,
               lastName: associate && associate.lastName,
             })),
-            surveyId,
+            survey: {
+              id: surveyId && surveyId.id,
+              description: surveyId && surveyId.description,
+            },
           }),
         ),
       );
