@@ -175,14 +175,8 @@ const routes = () => {
     if (isAdmin(req.user)) {
       const { id } = req.params;
       try {
-        const data = await Project.deleteOne(id, { useFindAndModify: false });
-        if (!data) {
-          res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-            message: INTERNAL_SERVER_ERROR,
-          });
-        } else {
-          res.status(HttpStatus.OK).send({ message: 'Project was deleted successfully.' });
-        }
+        await Project.deleteOne(id);
+        res.status(HttpStatus.OK).send({ message: 'Project was deleted successfully.' });
       } catch (err) {
         logger.error(err);
         res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
