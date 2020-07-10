@@ -53,13 +53,15 @@ passport.use(
           _id: id,
         })
 
-        if (user) {
+        if (user && !user.isDeleted) {
           if (exp * 1000 < new Date().getTime()) {
             return next(null, false)
           }
 
           return next(null, user)
         }
+
+        return next(null, false)
       } catch (e) {
         logger.error(e)
       }

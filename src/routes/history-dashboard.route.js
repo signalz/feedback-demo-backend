@@ -3,35 +3,34 @@ import HttpStatus from 'http-status-codes';
 import mongoose from 'mongoose';
 
 import { BAD_REQUEST, FORBIDDEN, INTERNAL_SERVER_ERROR } from '../constants';
-import { Project, Rating } from '../models';
+import { Feedback, Project } from '../models';
 import { logger, isAdmin } from '../utils';
 
 const routes = () => {
   const router = express.Router();
   router.post('/', async (req, res) => {
     const userId = req.user.id;
-    const { customer, domain, projectId, sectionId } = req.body;
+    const { projectId, sectionTitle } = req.body;
     try {
       const matchOpts = {};
       if (projectId) {
-        const project = await Project.findById(projectId);
-
+        const project = await Project.findById(projectId)
         if (!isAdmin(req.user)) {
-          if (!project.manager) {
+          if (!project.manager && !project.associates.includes(mongoose.Types.ObjectId(userId))) {
             res.status(HttpStatus.FORBIDDEN).json({
               message: FORBIDDEN,
-            });
+            })
           } else if (
             project.manager.toString() !== userId &&
             !project.associates.includes(mongoose.Types.ObjectId(userId))
           ) {
             res.status(HttpStatus.FORBIDDEN).json({
               message: FORBIDDEN,
-            });
+            })
           }
         }
 
-        matchOpts.projectId = mongoose.Types.ObjectId(projectId);
+        matchOpts.projectId = mongoose.Types.ObjectId(projectId)
       } else if (!projectId) {
         if (!isAdmin(req.user)) {
           const projects = await Project.find({
@@ -54,14 +53,18 @@ const routes = () => {
           };
         }
       }
-      if (customer) matchOpts.customer = customer;
-      if (domain) matchOpts.domain = domain;
-      if (sectionId) matchOpts.sectionId = mongoose.Types.ObjectId(sectionId);
 
-      const data = await Rating.aggregate([
+      if (sectionTitle) matchOpts['sections.title'] = sectionTitle;
+
+      const data = await Feedback.aggregate([
+        { $unwind: '$sections' },
+        { $unwind: '$sections.questions' },
         {
-          $match: matchOpts,
+          $addFields: {
+            rating: '$sections.questions.rating',
+          },
         },
+        { $match: matchOpts },
         {
           $group: {
             _id: {
