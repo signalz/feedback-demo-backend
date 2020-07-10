@@ -39,13 +39,25 @@ const routes = () => {
       }
       res.status(HttpStatus.OK).send(
         projects.map(
-          ({ name, id, startDate, endDate, customer, domain, manager, associates, surveyId }) => ({
+          ({
+            name,
+            id,
+            startDate,
+            endDate,
+            customer,
+            domain,
+            manager,
+            associates,
+            surveyId,
+            description,
+          }) => ({
             id,
             name,
             startDate,
             endDate,
             customer,
             domain,
+            description,
             manager: {
               id: manager && manager.id,
               firstName: manager && manager.firstName,

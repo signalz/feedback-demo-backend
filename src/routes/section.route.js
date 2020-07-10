@@ -35,7 +35,8 @@ const routes = () => {
       const sections = await Feedback.aggregate([
         { $match: matchOpts },
         { $unwind: '$sections' },
-        { $group: { _id: null, titles: { $addToSet: '$sections.title' } } },
+        { $group: { _id: null, title: { $addToSet: '$sections.title' } } },
+        { $unwind: '$title' },
       ])
       res.status(HttpStatus.OK).send(sections)
     } catch (e) {

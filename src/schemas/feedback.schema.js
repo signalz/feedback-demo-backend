@@ -16,11 +16,11 @@ const createFeedbackSchema = Joi.object({
             }),
           )
           .min(1)
-          .required(),
+          .optional(),
       }),
     )
     .min(1)
-    .required(),
+    .optional(),
   review: Joi.string().allow('').optional(),
   event: Joi.string().allow('').optional(),
 })
