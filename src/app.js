@@ -8,7 +8,6 @@ import {
   HistoryDashboardRoutes,
   OverviewDashboardRoutes,
   ProjectRoutes,
-  QuestionRoutes,
   SectionRoutes,
   SignupRoutes,
   SigninRoutes,
@@ -25,7 +24,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cors());
 app.use(morgan('dev'));
 
-app.use('/signup', passport.authenticate('jwt', { session: false }), SignupRoutes());
+app.use('/signup', SignupRoutes());
 app.use(
   '/signin',
   passport.authenticate('local', {
@@ -38,8 +37,6 @@ app.use(
 app.use('/signin-with-token', passport.authenticate('jwt', { session: false }), SigninToken());
 
 app.use('/api/projects', passport.authenticate('jwt', { session: false }), ProjectRoutes());
-
-app.use('/api/questions', passport.authenticate('jwt', { session: false }), QuestionRoutes());
 
 app.use('/api/sections', passport.authenticate('jwt', { session: false }), SectionRoutes());
 

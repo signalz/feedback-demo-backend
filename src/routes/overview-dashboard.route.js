@@ -1,49 +1,39 @@
-import express from 'express';
-import HttpStatus from 'http-status-codes';
-import mongoose from 'mongoose';
+import express from 'express'
+import HttpStatus from 'http-status-codes'
+import mongoose from 'mongoose'
 
-import { BAD_REQUEST, FORBIDDEN, INTERNAL_SERVER_ERROR } from '../constants';
-import { Project, Rating } from '../models';
-import { logger, isAdmin } from '../utils';
+import { BAD_REQUEST, FORBIDDEN, INTERNAL_SERVER_ERROR } from '../constants'
+import { Project, Feedback } from '../models'
+import { logger, isAdmin } from '../utils'
 
 const routes = () => {
-  const router = express.Router();
+  const router = express.Router()
   router.post('/', async (req, res) => {
-    const userId = req.user.id;
-    const { customer, domain, projectId, sectionId } = req.body;
+    const userId = req.user.id
+    const { projectId, sectionTitle } = req.body
     try {
-      const matchOpts = {};
-      const groupId = {};
-
-      if (customer) {
-        matchOpts.customer = customer;
-        groupId.customer = '$customer';
-      }
-
-      if (domain) {
-        matchOpts.domain = domain;
-        groupId.domain = '$domain';
-      }
+      const matchOpts = {}
+      // const groupId = {}
 
       if (projectId) {
-        const project = await Project.findById(projectId);
+        const project = await Project.findById(projectId)
         if (!isAdmin(req.user)) {
-          if (!project.manager) {
+          if (!project.manager && !project.associates.includes(mongoose.Types.ObjectId(userId))) {
             res.status(HttpStatus.FORBIDDEN).json({
               message: FORBIDDEN,
-            });
+            })
           } else if (
             project.manager.toString() !== userId &&
             !project.associates.includes(mongoose.Types.ObjectId(userId))
           ) {
             res.status(HttpStatus.FORBIDDEN).json({
               message: FORBIDDEN,
-            });
+            })
           }
         }
 
-        matchOpts.projectId = mongoose.Types.ObjectId(projectId);
-        groupId.projectId = '$projectId';
+        matchOpts.projectId = mongoose.Types.ObjectId(projectId)
+        // groupId.projectId = '$projectId'
       } else if (!projectId) {
         if (!isAdmin(req.user)) {
           const projects = await Project.find({
@@ -59,37 +49,34 @@ const routes = () => {
                 },
               },
             ],
-          });
+          })
 
           matchOpts.projectId = {
             $in: projects.map((project) => mongoose.Types.ObjectId(project.id)),
-          };
+          }
         }
       }
 
-      if (sectionId) {
-        matchOpts.sectionId = mongoose.Types.ObjectId(sectionId);
-        groupId.sectionId = '$sectionId';
+      if (sectionTitle) {
+        matchOpts['sections.title'] = sectionTitle
       }
 
-      // if (customer) groupId.customer = '$customer';
-      // if (domain) groupId.domain = '$domain';
-      // if (projectId) groupId.projectId = '$projectId';
-      // if (sectionId) groupId.sectionId = '$sectionId';
-      groupId.rating = '$rating';
-
-      const data = await Rating.aggregate([
+      const data = await Feedback.aggregate([
+        { $unwind: '$sections' },
+        { $unwind: '$sections.questions' },
         {
-          $match: matchOpts,
+          $addFields: {
+            rating: '$sections.questions.rating',
+          },
         },
+        { $match: matchOpts },
         {
           $group: {
-            _id: groupId,
+            _id: '$rating',
             count: { $sum: 1 },
           },
         },
-        { $sort: { count: -1 } },
-      ]);
+      ])
 
       if (data) {
         const output = {
@@ -97,24 +84,24 @@ const routes = () => {
           GOLD: 0,
           SILVER: 0,
           BRONZE: 0,
-        };
+        }
         data.forEach((ele) => {
-          if (ele._id.rating === 4) output.PLATINUM = ele.count;
-          if (ele._id.rating === 3) output.GOLD = ele.count;
-          if (ele._id.rating === 2) output.SILVER = ele.count;
-          if (ele._id.rating === 1) output.BRONZE = ele.count;
-        });
-        res.status(HttpStatus.OK).send(output);
+          if (ele._id === 4) output.PLATINUM = ele.count
+          if (ele._id === 3) output.GOLD = ele.count
+          if (ele._id === 2) output.SILVER = ele.count
+          if (ele._id === 1) output.BRONZE = ele.count
+        })
+        res.status(HttpStatus.OK).send(output)
       } else {
-        res.status(HttpStatus.BAD_REQUEST).send({ message: BAD_REQUEST });
+        res.status(HttpStatus.BAD_REQUEST).send({ message: BAD_REQUEST })
       }
     } catch (err) {
-      logger.error(err);
-      res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: INTERNAL_SERVER_ERROR });
+      logger.error(err)
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: INTERNAL_SERVER_ERROR })
     }
-  });
+  })
 
-  return router;
-};
+  return router
+}
 
-export default routes;
+export default routes

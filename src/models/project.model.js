@@ -13,6 +13,7 @@ const schema = Schema(
     },
     customer: String,
     domain: String,
+    description: String,
     manager: { type: Schema.Types.ObjectId, ref: 'User' },
     associates: [{ type: Schema.Types.ObjectId, ref: 'User' }],
     surveyId: { type: Schema.Types.ObjectId, ref: 'Survey' },
