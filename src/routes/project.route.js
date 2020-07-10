@@ -147,7 +147,7 @@ const routes = () => {
                 message: INTERNAL_SERVER_ERROR,
               })
             } else {
-              res.status(HttpStatus.OK).send({ message: 'Project was updated successfully.' })
+              res.status(HttpStatus.OK).send(update)
             }
           } catch (err) {
             logger.error(err)

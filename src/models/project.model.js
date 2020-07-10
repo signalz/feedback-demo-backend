@@ -1,4 +1,4 @@
-import mongoose, { Schema } from 'mongoose';
+import mongoose, { Schema } from 'mongoose'
 
 const schema = Schema(
   {
@@ -22,14 +22,14 @@ const schema = Schema(
     timestamps: true,
     autoCreate: true,
   },
-);
+)
 
 schema.method('toJSON', function () {
-  const { __v, _id, createdAt, updatedAt, ...object } = this.toObject();
-  object.id = _id;
-  return object;
-});
+  const { __v, _id, createdAt, updatedAt, ...object } = this.toObject()
+  object.id = _id
+  return object
+})
 
-const Project = mongoose.model('Project', schema);
+const Project = mongoose.model('Project', schema)
 
-export default Project;
+export default Project
