@@ -340,7 +340,7 @@ NOT IMPLEMENTED YET
 #### Get Surveys
 
 ```javascript
-[GET] /api/projects
+[GET] /api/surveys
 Header: {
   Authorization: `Bearer ${token}`
 }
@@ -364,7 +364,7 @@ Response: [{
 #### Get Single Survey
 
 ```javascript
-[GET] /api/projects/:id
+[GET] /api/surveys/:id
 Header: {
   Authorization: `Bearer ${token}`
 }
@@ -466,6 +466,35 @@ Response: {
     }]
   }]
 }
+```
+
+#### Get Feedback History
+
+```javascript
+[GET] /api/feedbacks?projectId
+Header: {
+  Authorization: `Bearer ${token}`
+}
+
+Request:
+
+Response: [{
+  id,
+  description,
+  review,
+  event,
+  sections: [{
+    id,
+    title,
+    order,
+    questions:[{
+      text,
+      order,
+      id,
+      rating
+    }]
+  }]
+}]
 ```
 
 ### Section API

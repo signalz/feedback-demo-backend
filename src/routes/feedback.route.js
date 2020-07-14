@@ -100,18 +100,57 @@ const routes = () => {
   // get feedback history
   router.get('/history', async (req, res) => {
     const userId = req.user.id
-    const { projectId, surveyId } = req.query
+    const { projectId } = req.query
+    let feedbacks = []
+
+    const matchOps = {}
+    if (projectId) {
+      matchOps.projectId = projectId
+    }
+
+    matchOps.userId = userId
 
     try {
-      const feedbacks = await Feedback.find(
-        { surveyId, projectId, userId },
-        {},
-        {
-          sort: { createdAt: -1 },
-        },
-      )
+      if (isAdmin(req.user)) {
+        feedbacks = await Feedback.find(
+          matchOps,
+          {},
+          {
+            sort: { createdAt: -1 },
+          },
+        )
+        res.status(HttpStatus.OK).send(feedbacks)
+        return
+      }
 
-      res.status(HttpStatus.OK).send(feedbacks)
+      if (!projectId) {
+        res.status(HttpStatus.BAD_REQUEST).json({
+          message: `${BAD_REQUEST}: projectId is required`,
+        })
+      } else {
+        const project = await Project.findById(projectId)
+        if (!project.manager && !project.associates.includes(mongoose.Types.ObjectId(userId))) {
+          res.status(HttpStatus.FORBIDDEN).json({
+            message: FORBIDDEN,
+          })
+        } else if (
+          project.manager.toString() !== userId &&
+          !project.associates.includes(mongoose.Types.ObjectId(userId))
+        ) {
+          res.status(HttpStatus.FORBIDDEN).json({
+            message: FORBIDDEN,
+          })
+        } else {
+          feedbacks = await Feedback.find(
+            matchOps,
+            {},
+            {
+              sort: { createdAt: -1 },
+            },
+          )
+          res.status(HttpStatus.OK).send(feedbacks)
+        }
+      }
     } catch (err) {
       logger.error(err)
       res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: INTERNAL_SERVER_ERROR })
