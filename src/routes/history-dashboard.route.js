@@ -79,7 +79,7 @@ const routes = () => {
         res.send(
           data.map((ele) => ({
             date: ele._id.date,
-            rating: ele.rating.toFixed(2),
+            rating: ele.rating && ele.rating.toFixed(2),
           })),
         );
       } else res.status(HttpStatus.BAD_REQUEST).send({ message: BAD_REQUEST });

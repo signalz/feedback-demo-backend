@@ -12,14 +12,12 @@ const createFeedbackSchema = Joi.object({
             Joi.object({
               text: Joi.string().required(),
               order: Joi.number().min(0).required(),
-              rating: Joi.number().min(0).max(4).required(),
+              rating: Joi.number().min(0).max(4).optional(),
             }),
           )
-          .min(1)
           .optional(),
       }),
     )
-    .min(1)
     .optional(),
   review: Joi.string().allow('').optional(),
   event: Joi.string().allow('').optional(),

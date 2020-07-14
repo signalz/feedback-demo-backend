@@ -4,7 +4,7 @@ const questionSchema = Schema(
   {
     text: { type: String, required: true },
     order: { type: Number, required: true },
-    rating: { type: Number, required: true, min: 0, max: 4 },
+    rating: { type: Number, required: false, min: 1, max: 4 },
   },
   { timestamps: true },
 )
