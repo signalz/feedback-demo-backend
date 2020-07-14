@@ -29,7 +29,7 @@ const schema = Schema(
   { timestamps: true },
 )
 schema.method('toJSON', function () {
-  const { __v, _id, createdAt, updatedAt, sections, ...object } = this.toObject()
+  const { __v, _id, updatedAt, sections, ...object } = this.toObject()
   object.id = _id
   return {
     ...object,
