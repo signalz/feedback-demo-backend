@@ -3,8 +3,14 @@
 ## Dev environment
 
 - npm install
-- Change configuration in src/config.db.config.js
+- Change database configuration in src/config.db.config.js
 - npm run watch
+
+## Prod deployment
+
+- npm install
+- Change database configuration in src/config.db.config.js
+- npm start
 
 ## API Docs
 
