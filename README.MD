@@ -477,7 +477,7 @@ Response: {
 #### Get Feedback History
 
 ```javascript
-[GET] /api/feedbacks?projectId
+[GET] /api/feedbacks/history?projectId
 Header: {
   Authorization: `Bearer ${token}`
 }
