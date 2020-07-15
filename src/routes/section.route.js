@@ -37,7 +37,7 @@ const routes = () => {
         const project = await Project.findById(projectId)
         if (project) {
           matchOpts.projectId = {
-            $in: [project.id],
+            $in: [mongoose.Types.ObjectId(project.id)],
           }
 
           if (!isAdmin(req.user)) {
