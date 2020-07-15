@@ -11,24 +11,38 @@ const routes = () => {
   router.get('/', async (req, res) => {
     try {
       const userId = req.user.id
+      const { projectId } = req.query
       const matchOpts = {}
       if (!isAdmin(req.user)) {
-        const projects = await Project.find({
-          $or: [
-            {
-              manager: mongoose.Types.ObjectId(userId),
-            },
-            {
-              associates: {
-                $elemMatch: {
-                  $eq: mongoose.Types.ObjectId(userId),
+        if (!projectId) {
+          const projects = await Project.find({
+            $or: [
+              {
+                manager: mongoose.Types.ObjectId(userId),
+              },
+              {
+                associates: {
+                  $elemMatch: {
+                    $eq: mongoose.Types.ObjectId(userId),
+                  },
                 },
               },
-            },
-          ],
-        })
-        matchOpts.projectId = {
-          $in: projects.map((project) => mongoose.Types.ObjectId(project.id)),
+            ],
+          })
+          matchOpts.projectId = {
+            $in: projects.map((project) => mongoose.Types.ObjectId(project.id)),
+          }
+        } else {
+          const project = await Project.findById(projectId)
+          if (project) {
+            matchOpts.projectId = {
+              $in: [mongoose.Types.ObjectId(project.id)],
+            }
+          } else {
+            res.status(HttpStatus.BAD_REQUEST).json({
+              message: 'Project not found',
+            })
+          }
         }
       }
 
