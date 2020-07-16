@@ -2,14 +2,16 @@
 
 ## Dev environment
 
+- require mongodb 4
 - npm install
 - Change database configuration in src/config.db.config.js
 - npm run watch
 
 ## Prod deployment
 
+- require mongodb 4
 - npm install
-- Change database configuration in src/config.db.config.js
+- Change database configuration (DB_URL) in src/config.db.config.js
 - npm start
 
 ## API Docs
