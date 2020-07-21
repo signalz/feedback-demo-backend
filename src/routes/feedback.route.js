@@ -5,7 +5,7 @@ import mongoose from 'mongoose'
 import { BAD_REQUEST, FORBIDDEN, INTERNAL_SERVER_ERROR } from '../constants'
 import { Feedback, Project } from '../models'
 import { FeedbackSchema } from '../schemas'
-import { logger, isAdmin, getSchemaError } from '../utils'
+import { logger, isAdmin, isSupervisor, getSchemaError } from '../utils'
 
 const routes = () => {
   const router = express.Router()
@@ -15,6 +15,12 @@ const routes = () => {
         const userId = req.user.id
         const { projectId } = feedback
         try {
+          if (isSupervisor(req.user)) {
+            res.status(HttpStatus.FORBIDDEN).json({
+              message: FORBIDDEN,
+            })
+            return
+          }
           const project = await Project.findById(projectId)
 
           if (!project) {
@@ -63,7 +69,6 @@ const routes = () => {
       })
   })
 
-  // TODO: permission
   // get latest feedback
   router.get('/', async (req, res) => {
     const userId = req.user.id
@@ -75,19 +80,40 @@ const routes = () => {
           message: `${BAD_REQUEST}: projectId is required`,
         })
       } else {
-        const feedback = await Feedback.findOne(
-          { projectId, userId },
-          {},
-          {
-            sort: { createdAt: -1 },
-          },
-        )
-        if (!feedback) {
-          res.status(HttpStatus.OK).send({
-            message: `Not found Feedback with surveyId projectId ${projectId} and userId ${userId}`,
+        const project = await Project.findById(projectId)
+        if (
+          !project.manager &&
+          !project.associates.includes(mongoose.Types.ObjectId(userId)) &&
+          !isAdmin(req.user) &&
+          !isSupervisor(req.user)
+        ) {
+          res.status(HttpStatus.FORBIDDEN).json({
+            message: FORBIDDEN,
+          })
+        } else if (
+          project.manager.toString() !== userId &&
+          !project.associates.includes(
+            mongoose.Types.ObjectId(userId) && !isAdmin(req.user) && !isSupervisor(req.user),
+          )
+        ) {
+          res.status(HttpStatus.FORBIDDEN).json({
+            message: FORBIDDEN,
           })
         } else {
-          res.status(HttpStatus.OK).send(feedback)
+          const feedback = await Feedback.findOne(
+            { projectId, userId },
+            {},
+            {
+              sort: { createdAt: -1 },
+            },
+          )
+          if (!feedback) {
+            res.status(HttpStatus.OK).send({
+              message: `Not found Feedback with surveyId projectId ${projectId} and userId ${userId}`,
+            })
+          } else {
+            res.status(HttpStatus.OK).send(feedback)
+          }
         }
       }
     } catch (err) {
@@ -96,7 +122,6 @@ const routes = () => {
     }
   })
 
-  // TODO: permission
   // get feedback history
   router.get('/history', async (req, res) => {
     const userId = req.user.id
@@ -111,7 +136,7 @@ const routes = () => {
     matchOps.userId = userId
 
     try {
-      if (isAdmin(req.user)) {
+      if (isAdmin(req.user) || isSupervisor(req.user)) {
         feedbacks = await Feedback.find(
           matchOps,
           {},
@@ -121,20 +146,23 @@ const routes = () => {
         )
           .populate({ path: 'userId' })
           .populate({ path: 'projectId' })
-        res.status(HttpStatus.OK).send(feedbacks.map((feedback) => ({
-          id: feedback.id,
-          review: feedback.review,
-          event: feedback.event,
-          sections: feedback.sections,
-          createdAt: feedback.createdAt,
-          user: {
-            firstName: feedback.userId.firstName,
-            lastName: feedback.userId.lastName,
-          },
-          project: {
-            name: feedback.projectId.name,
-          },
-        })))
+
+        res.status(HttpStatus.OK).send(
+          feedbacks.map((feedback) => ({
+            id: feedback.id,
+            review: feedback.review,
+            event: feedback.event,
+            sections: feedback.sections,
+            createdAt: feedback.createdAt,
+            user: {
+              firstName: feedback.userId.firstName,
+              lastName: feedback.userId.lastName,
+            },
+            project: {
+              name: feedback.projectId.name,
+            },
+          })),
+        )
         return
       }
 
