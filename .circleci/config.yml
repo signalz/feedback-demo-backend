@@ -12,8 +12,8 @@ jobs:
           steps:
             - run: npm install
             - run: curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
-            - run: ./cc-test-reporter before-build
             - run: chmod +x ./cc-test-reporter
+            - run: ./cc-test-reporter before-build
             - run: npm test
             - run: ./cc-test-reporter format-coverage -t lcov coverage/lcov.info
             - run: ./cc-test-reporter upload-coverage
