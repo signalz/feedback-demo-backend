@@ -2,7 +2,7 @@ import Joi from '@hapi/joi'
 import EmailValidator from 'email-validator'
 import PasswordValidator from 'password-validator'
 
-import { ROLE_ADMIN, ROLE_USER } from '../config'
+import { ROLE_ADMIN, ROLE_SUPERVISOR, ROLE_USER } from '../config'
 import { INVALID_PASSWORD, INVALID_USERNAME } from '../constants'
 
 // eslint-disable-next-line
@@ -31,7 +31,10 @@ export const createUserSchema = Joi.object({
   }),
   firstName: Joi.string().allow('').optional(),
   lastName: Joi.string().allow('').optional(),
-  roles: Joi.array().items(Joi.string().valid(ROLE_USER, ROLE_ADMIN)).min(1).required(),
+  roles: Joi.array()
+    .items(Joi.string().valid(ROLE_USER, ROLE_ADMIN, ROLE_SUPERVISOR))
+    .min(1)
+    .required(),
   isDeleted: Joi.boolean().optional(),
 })
 
@@ -41,7 +44,10 @@ export const updateUserSchema = Joi.object({
   }),
   firstName: Joi.string().allow('').optional(),
   lastName: Joi.string().allow('').optional(),
-  roles: Joi.array().items(Joi.string().valid(ROLE_USER, ROLE_ADMIN)).min(1).optional(),
+  roles: Joi.array()
+    .items(Joi.string().valid(ROLE_USER, ROLE_ADMIN, ROLE_SUPERVISOR))
+    .min(1)
+    .optional(),
   isDeleted: Joi.boolean().optional(),
 })
 
