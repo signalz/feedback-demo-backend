@@ -16,7 +16,7 @@ jobs:
             - run: ./cc-test-reporter before-build
             - run: npm test
             - run: ./cc-test-reporter format-coverage -t lcov coverage/lcov.info
-            - run: ./cc-test-reporter upload-coverage
+            - run: ./cc-test-reporter upload-coverage -r $CODECLIMATE
             - run: npm run build
 workflows:
     build-and-test:
