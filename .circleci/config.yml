@@ -1,6 +1,7 @@
 version: 2.1
 orbs:
-  node: circleci/node@1.1.6
+  node: circleci/node@3.0.1
+  heroku: circleci/heroku@1.0.1
 jobs:
   build-and-test:
     executor:
@@ -10,7 +11,13 @@ jobs:
       - node/with-cache:
           steps:
             - run: npm install
+            - run: curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+            - run: ./cc-test-reporter before-build
+            - run: chmod +x ./cc-test-reporter
             - run: npm test
+            - run: ./cc-test-reporter format-coverage -t lcov coverage/lcov.info
+            - run: ./cc-test-reporter upload-coverage
+            - run: npm run build
 workflows:
     build-and-test:
       jobs:
