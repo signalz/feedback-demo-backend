@@ -4,8 +4,6 @@ orbs:
   heroku: circleci/heroku@1.0.1
 jobs:
   build-and-test:
-    executor:
-      name: node/default
     steps:
       - checkout
       - node/with-cache:
