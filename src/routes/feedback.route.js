@@ -92,9 +92,9 @@ const routes = () => {
           })
         } else if (
           project.manager.toString() !== userId &&
-          !project.associates.includes(
-            mongoose.Types.ObjectId(userId) && !isAdmin(req.user) && !isSupervisor(req.user),
-          )
+          !project.associates.includes(mongoose.Types.ObjectId(userId)) &&
+          !isAdmin(req.user) &&
+          !isSupervisor(req.user)
         ) {
           res.status(HttpStatus.FORBIDDEN).json({
             message: FORBIDDEN,
