@@ -1,5 +1,7 @@
 # Feedback Backend
 
+[![Maintainability](https://api.codeclimate.com/v1/badges/02445b5acedea91d62f9/maintainability)](https://codeclimate.com/github/signalz/feedback-demo-backend/maintainability)
+
 ## Dev environment
 
 - require mongodb 4
