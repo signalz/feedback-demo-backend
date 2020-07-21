@@ -100,8 +100,13 @@ const routes = () => {
             message: FORBIDDEN,
           })
         } else {
+          const matchOps = {}
+          matchOps.projectId = projectId
+          if (!isAdmin(req.user) && !isSupervisor(req.user)) {
+            matchOps.userId = userId
+          }
           const feedback = await Feedback.findOne(
-            { projectId, userId },
+            matchOps,
             {},
             {
               sort: { createdAt: -1 },
@@ -133,7 +138,9 @@ const routes = () => {
       matchOps.projectId = projectId
     }
 
-    matchOps.userId = userId
+    if (!isAdmin(req.user) && !isSupervisor(req.user)) {
+      matchOps.userId = userId
+    }
 
     try {
       if (isAdmin(req.user) || isSupervisor(req.user)) {
