@@ -6,7 +6,7 @@ import { BCRYPT_SALT, ROLE_SUPER_ADMIN } from '../config'
 import { BAD_REQUEST, FORBIDDEN, INTERNAL_SERVER_ERROR, USER_DUPLICATED } from '../constants'
 import { User } from '../models'
 import { createUserSchema, updatePasswordSchema, updateUserSchema } from '../schemas'
-import { logger, isAdmin, getSchemaError } from '../utils'
+import { logger, isAdmin, isSupervisor, getSchemaError } from '../utils'
 
 const routes = () => {
   const router = express.Router()
@@ -46,7 +46,7 @@ const routes = () => {
   })
 
   router.get('/', async (req, res) => {
-    if (isAdmin(req.user)) {
+    if (isAdmin(req.user) || isSupervisor(req.user)) {
       try {
         const users = await User.find({})
         logger.info(`User ${req.user.id} get all users`)

@@ -4,13 +4,13 @@ import HttpStatus from 'http-status-codes'
 import { FORBIDDEN, INTERNAL_SERVER_ERROR } from '../constants'
 import { Survey } from '../models'
 import { SurveySchema } from '../schemas'
-import { logger, isAdmin, getSchemaError } from '../utils'
+import { logger, isAdmin, isSupervisor, getSchemaError } from '../utils'
 
 const routes = () => {
   const router = express.Router()
   router.get('/', async (req, res) => {
     try {
-      if (isAdmin(req.user)) {
+      if (isAdmin(req.user) || isSupervisor(req.user)) {
         const surveys = await Survey.find({})
         res.status(HttpStatus.OK).send(surveys)
       } else {

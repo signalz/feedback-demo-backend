@@ -4,7 +4,7 @@ import mongoose from 'mongoose'
 
 import { FORBIDDEN, INTERNAL_SERVER_ERROR } from '../constants'
 import { Feedback, Project } from '../models'
-import { logger, isAdmin } from '../utils'
+import { logger, isAdmin, isSupervisor } from '../utils'
 
 const routes = () => {
   const router = express.Router()
@@ -14,7 +14,7 @@ const routes = () => {
       const { projectId } = req.query
       const matchOpts = {}
       if (!projectId) {
-        if (!isAdmin(req.user)) {
+        if (!isAdmin(req.user) && !isSupervisor(req.user)) {
           const projects = await Project.find({
             $or: [
               {
@@ -40,7 +40,7 @@ const routes = () => {
             $in: [mongoose.Types.ObjectId(project.id)],
           }
 
-          if (!isAdmin(req.user)) {
+          if (!isAdmin(req.user) && !isSupervisor(req.user)) {
             if (!project.manager && !project.associates.includes(mongoose.Types.ObjectId(userId))) {
               res.status(HttpStatus.FORBIDDEN).json({
                 message: FORBIDDEN,

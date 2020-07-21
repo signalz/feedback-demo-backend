@@ -5,7 +5,7 @@ import mongoose from 'mongoose'
 import { FORBIDDEN, INTERNAL_SERVER_ERROR } from '../constants'
 import { Project } from '../models'
 import { ProjectSchema } from '../schemas'
-import { logger, isAdmin, getSchemaError } from '../utils'
+import { logger, isAdmin, isSupervisor, getSchemaError } from '../utils'
 
 const routes = () => {
   const router = express.Router()
@@ -13,7 +13,7 @@ const routes = () => {
     try {
       let projects
 
-      if (isAdmin(req.user)) {
+      if (isAdmin(req.user) || isSupervisor(req.user)) {
         projects = await Project.find({})
           .populate({ path: 'manager' })
           .populate({ path: 'associates' })
@@ -90,7 +90,8 @@ const routes = () => {
       if (
         project.manager === req.user.id ||
         project.associates.includes(mongoose.Types.ObjectId(req.user.id)) ||
-        isAdmin(req.user)
+        isAdmin(req.user) ||
+        isSupervisor(req.user)
       ) {
         res.status(HttpStatus.OK).send(project)
       } else {

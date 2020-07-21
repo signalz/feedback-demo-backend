@@ -1,6 +1,6 @@
 import mongoose, { Schema } from 'mongoose'
 
-import { ROLE_ADMIN, ROLE_USER } from '../config'
+import { ROLE_ADMIN, ROLE_SUPERVISOR, ROLE_USER } from '../config'
 
 const schema = Schema({
   username: {
@@ -14,7 +14,7 @@ const schema = Schema({
   roles: [
     {
       type: String,
-      enum: [ROLE_ADMIN, ROLE_USER],
+      enum: [ROLE_ADMIN, ROLE_SUPERVISOR, ROLE_USER],
       default: ROLE_USER,
     },
   ],
