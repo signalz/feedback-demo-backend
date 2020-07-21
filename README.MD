@@ -1,13 +1,13 @@
 # Feedback Backend
 
-[![Maintainability](https://api.codeclimate.com/v1/badges/02445b5acedea91d62f9/maintainability)](https://codeclimate.com/github/signalz/feedback-demo-backend/maintainability)
+[![Maintainability](https://api.codeclimate.com/v1/badges/02445b5acedea91d62f9/maintainability)](https://codeclimate.com/github/signalz/feedback-demo-backend/maintainability) [![Test Coverage](https://api.codeclimate.com/v1/badges/02445b5acedea91d62f9/test_coverage)](https://codeclimate.com/github/signalz/feedback-demo-backend/test_coverage)
 
 ## Dev environment
 
 - require mongodb 4
 - npm install
 - Change database configuration in src/config.db.config.js
-- npm run watch
+- npm run start:dev
 
 ## Prod deployment
 

@@ -8,8 +8,9 @@
     "start:dev": "nodemon ./src/index.js --exec babel-node",
     "build": "babel ./src --out-dir build",
     "build:clean": "rimraf ./build",
-    "lint": "eslint ./src/**/*.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "lint": "eslint ./src/**/*.js --fix",
+    "test": "nyc mocha --require @babel/register",
+    "test:test": "nyc mocha"
   },
   "repository": {
     "type": "git",
@@ -54,9 +55,15 @@
   },
   "devDependencies": {
     "@babel/node": "^7.10.5",
+    "@babel/register": "^7.10.5",
+    "@istanbuljs/nyc-config-babel": "^3.0.0",
+    "babel-plugin-istanbul": "^6.0.0",
+    "chai": "^4.2.0",
     "eslint": "^7.5.0",
     "eslint-config-airbnb-base": "^14.2.0",
     "eslint-plugin-import": "^2.22.0",
-    "nodemon": "^2.0.4"
+    "mocha": "^8.0.1",
+    "nodemon": "^2.0.4",
+    "nyc": "^15.1.0"
   }
 }
