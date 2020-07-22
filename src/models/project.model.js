@@ -16,6 +16,7 @@ const schema = Schema(
     description: String,
     manager: { type: Schema.Types.ObjectId, ref: 'User' },
     associates: [{ type: Schema.Types.ObjectId, ref: 'User' }],
+    views: [{ type: Schema.Types.ObjectId, ref: 'User' }],
     surveyId: { type: Schema.Types.ObjectId, ref: 'Survey' },
   },
   {

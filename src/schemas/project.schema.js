@@ -5,6 +5,7 @@ const createProjectSchema = Joi.object({
   manager: Joi.string().allow('').optional(),
   surveyId: Joi.string().allow('').optional(),
   associates: Joi.array().items(Joi.string().allow('').optional()),
+  views: Joi.array().items(Joi.string().allow('').optional()),
   description: Joi.string().allow('').optional(),
 })
 
