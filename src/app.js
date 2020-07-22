@@ -22,7 +22,7 @@ const app = express()
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(cors())
-app.use(morgan('dev'))
+app.use(morgan(':remote-addr - [:date[clf]] :method :url HTTP/:http-version :status :res[content-length] :user-agent'))
 
 app.use('/signup', passport.authenticate('jwt', { session: false }), SignupRoutes())
 app.use(
