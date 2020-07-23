@@ -6,6 +6,8 @@ const schema = Schema({
   username: {
     type: String,
     unique: true,
+    lowercase: true,
+    trim: true,
   },
   // email: String,
   password: String,
