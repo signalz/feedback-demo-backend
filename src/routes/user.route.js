@@ -18,6 +18,7 @@ const routes = () => {
           try {
             const userCreated = await User.create({
               ...user,
+              username: user.username.toLowerCase(),
               password: bcrypt.hashSync(user.password, BCRYPT_SALT),
               roles: [...new Set(req.body.roles)],
             })
@@ -129,7 +130,7 @@ const routes = () => {
             }
             const usr = await User.findByIdAndUpdate(
               id,
-              { ...user },
+              { ...user, username: user.username.toLowerCase() },
               {
                 useFindAndModify: false,
                 runValidators: true,
