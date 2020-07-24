@@ -203,7 +203,25 @@ const routes = () => {
               sort: { createdAt: -1 },
             },
           )
-          res.status(HttpStatus.OK).send(feedbacks)
+            .populate({ path: 'userId' })
+            .populate({ path: 'projectId' })
+
+          res.status(HttpStatus.OK).send(
+            feedbacks.map((feedback) => ({
+              id: feedback.id,
+              review: feedback.review,
+              event: feedback.event,
+              sections: feedback.sections,
+              createdAt: feedback.createdAt,
+              user: {
+                firstName: feedback.userId.firstName,
+                lastName: feedback.userId.lastName,
+              },
+              project: {
+                name: feedback.projectId.name,
+              },
+            }))
+          )
         }
       }
     } catch (err) {
