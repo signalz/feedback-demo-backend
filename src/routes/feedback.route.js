@@ -136,17 +136,9 @@ const routes = () => {
     const userId = req.user.id
     const { projectId } = req.query
     let feedbacks = []
-
     const matchOps = {}
     if (projectId) {
       matchOps.projectId = projectId
-    }
-
-    if (!isAdmin(req.user) && !isSupervisor(req.user)) {
-      const project = await Project.findById(projectId)
-      if (!(projectId && project.views.includes(mongoose.Types.ObjectId(userId)))) {
-        matchOps.userId = userId
-      }
     }
 
     try {
@@ -186,6 +178,9 @@ const routes = () => {
         })
       } else {
         const project = await Project.findById(projectId)
+        if (!project.views.includes(mongoose.Types.ObjectId(userId))) {
+          matchOps.userId = userId;
+        }
         if (!project.manager &&
           !project.associates.includes(mongoose.Types.ObjectId(userId)) &&
           !project.views.includes(mongoose.Types.ObjectId(userId))) {
