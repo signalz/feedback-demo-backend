@@ -17,6 +17,7 @@ const routes = () => {
         projects = await Project.find({})
           .populate({ path: 'manager' })
           .populate({ path: 'associates' })
+          .populate({ path: 'views' })
           .populate({ path: 'surveyId' })
       } else {
         projects = await Project.find({
@@ -31,10 +32,18 @@ const routes = () => {
                 },
               },
             },
+            {
+              views: {
+                $elemMatch: {
+                  $eq: mongoose.Types.ObjectId(req.user.id),
+                },
+              },
+            },
           ],
         })
           .populate({ path: 'manager' })
           .populate({ path: 'associates' }) // TODO: remove populate associates for user
+          .populate({ path: 'views' })
           .populate({ path: 'surveyId' })
       }
       res.status(HttpStatus.OK).send(
@@ -48,6 +57,7 @@ const routes = () => {
             domain,
             manager,
             associates,
+            views,
             surveyId,
             description,
           }) => ({
@@ -67,6 +77,11 @@ const routes = () => {
               id: associate && associate.id,
               firstName: associate && associate.firstName,
               lastName: associate && associate.lastName,
+            })),
+            views: views.map((view) => ({
+              id: view && view.id,
+              firstName: view && view.firstName,
+              lastName: view && view.lastName,
             })),
             survey: {
               id: surveyId && surveyId.id,
@@ -90,6 +105,7 @@ const routes = () => {
       if (
         project.manager === req.user.id ||
         project.associates.includes(mongoose.Types.ObjectId(req.user.id)) ||
+        project.views.includes(mongoose.Types.ObjectId(req.user.id)) ||
         isAdmin(req.user) ||
         isSupervisor(req.user)
       ) {

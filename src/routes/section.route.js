@@ -27,6 +27,13 @@ const routes = () => {
                   },
                 },
               },
+              {
+                views: {
+                  $elemMatch: {
+                    $eq: mongoose.Types.ObjectId(userId),
+                  },
+                },
+              },
             ],
           })
           matchOpts.projectId = {
@@ -41,7 +48,9 @@ const routes = () => {
           }
 
           if (!isAdmin(req.user) && !isSupervisor(req.user)) {
-            if (!project.manager && !project.associates.includes(mongoose.Types.ObjectId(userId))) {
+            if (!project.manager &&
+              !project.associates.includes(mongoose.Types.ObjectId(userId)) &&
+              !project.views.includes(mongoose.Types.ObjectId(userId))) {
               res.status(HttpStatus.FORBIDDEN).json({
                 message: FORBIDDEN,
               })
@@ -50,7 +59,8 @@ const routes = () => {
 
             if (
               project.manager.toString() !== userId &&
-              !project.associates.includes(mongoose.Types.ObjectId(userId))
+              !project.associates.includes(mongoose.Types.ObjectId(userId)) &&
+              !project.views.includes(mongoose.Types.ObjectId(userId))
             ) {
               res.status(HttpStatus.FORBIDDEN).json({
                 message: FORBIDDEN,

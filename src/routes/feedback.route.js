@@ -15,13 +15,13 @@ const routes = () => {
         const userId = req.user.id
         const { projectId } = feedback
         try {
-          if (isSupervisor(req.user)) {
+          const project = await Project.findById(projectId)
+          if (isSupervisor(req.user) || project.views.includes(mongoose.Types.ObjectId(userId))) {
             res.status(HttpStatus.FORBIDDEN).json({
               message: FORBIDDEN,
             })
             return
           }
-          const project = await Project.findById(projectId)
 
           if (!project) {
             logger.error(`Project ${projectId} was not found`)
@@ -84,6 +84,7 @@ const routes = () => {
         if (
           !project.manager &&
           !project.associates.includes(mongoose.Types.ObjectId(userId)) &&
+          !project.views.includes(mongoose.Types.ObjectId(userId)) &&
           !isAdmin(req.user) &&
           !isSupervisor(req.user)
         ) {
@@ -93,6 +94,7 @@ const routes = () => {
         } else if (
           project.manager.toString() !== userId &&
           !project.associates.includes(mongoose.Types.ObjectId(userId)) &&
+          !project.views.includes(mongoose.Types.ObjectId(userId)) &&
           !isAdmin(req.user) &&
           !isSupervisor(req.user)
         ) {
@@ -102,7 +104,9 @@ const routes = () => {
         } else {
           const matchOps = {}
           matchOps.projectId = projectId
-          if (!isAdmin(req.user) && !isSupervisor(req.user)) {
+          if (!isAdmin(req.user) &&
+            !isSupervisor(req.user) &&
+            !project.views.includes(mongoose.Types.ObjectId(userId))) {
             matchOps.userId = userId
           }
           const feedback = await Feedback.findOne(
@@ -132,14 +136,9 @@ const routes = () => {
     const userId = req.user.id
     const { projectId } = req.query
     let feedbacks = []
-
     const matchOps = {}
     if (projectId) {
       matchOps.projectId = projectId
-    }
-
-    if (!isAdmin(req.user) && !isSupervisor(req.user)) {
-      matchOps.userId = userId
     }
 
     try {
@@ -179,13 +178,19 @@ const routes = () => {
         })
       } else {
         const project = await Project.findById(projectId)
-        if (!project.manager && !project.associates.includes(mongoose.Types.ObjectId(userId))) {
+        if (!project.views.includes(mongoose.Types.ObjectId(userId))) {
+          matchOps.userId = userId;
+        }
+        if (!project.manager &&
+          !project.associates.includes(mongoose.Types.ObjectId(userId)) &&
+          !project.views.includes(mongoose.Types.ObjectId(userId))) {
           res.status(HttpStatus.FORBIDDEN).json({
             message: FORBIDDEN,
           })
         } else if (
           project.manager.toString() !== userId &&
-          !project.associates.includes(mongoose.Types.ObjectId(userId))
+          !project.associates.includes(mongoose.Types.ObjectId(userId)) &&
+          !project.views.includes(mongoose.Types.ObjectId(userId))
         ) {
           res.status(HttpStatus.FORBIDDEN).json({
             message: FORBIDDEN,
@@ -198,7 +203,25 @@ const routes = () => {
               sort: { createdAt: -1 },
             },
           )
-          res.status(HttpStatus.OK).send(feedbacks)
+            .populate({ path: 'userId' })
+            .populate({ path: 'projectId' })
+
+          res.status(HttpStatus.OK).send(
+            feedbacks.map((feedback) => ({
+              id: feedback.id,
+              review: feedback.review,
+              event: feedback.event,
+              sections: feedback.sections,
+              createdAt: feedback.createdAt,
+              user: {
+                firstName: feedback.userId.firstName,
+                lastName: feedback.userId.lastName,
+              },
+              project: {
+                name: feedback.projectId.name,
+              },
+            }))
+          )
         }
       }
     } catch (err) {
