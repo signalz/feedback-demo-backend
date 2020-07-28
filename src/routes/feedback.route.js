@@ -220,7 +220,7 @@ const routes = () => {
               project: {
                 name: feedback.projectId.name,
               },
-            }))
+            })),
           )
         }
       }
