@@ -5,7 +5,7 @@ import HttpStatus from 'http-status-codes'
 import { BCRYPT_SALT, ROLE_SUPER_ADMIN } from '../config'
 import { BAD_REQUEST, FORBIDDEN, INTERNAL_SERVER_ERROR, USER_DUPLICATED } from '../constants'
 import { User } from '../models'
-import { createUserSchema, updatePasswordSchema, updateUserSchema } from '../schemas'
+import { createUserSchema, updatePasswordSchema, updateUserSchema, selfUpdatePasswordSchema } from '../schemas'
 import { logger, isAdmin, isSupervisor, getSchemaError } from '../utils'
 
 const routes = () => {
@@ -210,6 +210,53 @@ const routes = () => {
         message: FORBIDDEN,
       })
     }
+  })
+
+  // change password by user
+  router.post('/password', async (req, res) => {
+    selfUpdatePasswordSchema
+      .validateAsync(req.body)
+      .then(async ({ password, newPassword, confirmNewPassword }) => {
+        const correctLegacy = bcrypt.compareSync(password, req.user.password)
+        if (!correctLegacy) {
+          res.status(HttpStatus.CONFLICT).json({
+            message: `${BAD_REQUEST}: Incorrect password!`,
+          })
+        }
+        else if (newPassword !== confirmNewPassword) {
+          res.status(HttpStatus.BAD_REQUEST).json({
+            message: `${BAD_REQUEST}: password is not match`,
+          })
+        } else {
+          try {
+            const usr = await User.findByIdAndUpdate(req.user.id, {
+              password: bcrypt.hashSync(newPassword, BCRYPT_SALT),
+            })
+
+            if (usr) {
+              logger.info(`New password is updated`)
+              res.status(HttpStatus.OK).send(usr.toJSON())
+            } else {
+              logger.error(usr)
+              res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+                message: INTERNAL_SERVER_ERROR,
+              })
+            }
+          } catch (e) {
+            logger.error(e)
+            res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+              message: INTERNAL_SERVER_ERROR,
+            })
+          }
+        }
+      })
+      .catch((error) => {
+        logger.error(error)
+        res.status(HttpStatus.BAD_REQUEST).json({
+          message: getSchemaError(error),
+        })
+      })
+
   })
 
   return router
