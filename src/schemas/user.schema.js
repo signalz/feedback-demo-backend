@@ -59,3 +59,15 @@ export const updatePasswordSchema = Joi.object({
     password: INVALID_PASSWORD,
   }),
 })
+
+export const selfUpdatePasswordSchema = Joi.object({
+  password: Joi.string().custom(validatePassword).required().messages({
+    password: INVALID_PASSWORD,
+  }),
+  newPassword: Joi.string().custom(validatePassword).required().messages({
+    password: INVALID_PASSWORD,
+  }),
+  confirmNewPassword: Joi.string().custom(validatePassword).required().messages({
+    password: INVALID_PASSWORD,
+  }),
+})
