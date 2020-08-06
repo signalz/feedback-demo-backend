@@ -16,13 +16,19 @@ import {
   UserRoutes,
 } from './routes'
 import passport, { generateToken } from './middlewares/authentication'
+import { logger } from './utils'
 
 const app = express()
 
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(cors())
-app.use(morgan(':remote-addr - [:date[clf]] :method :url HTTP/:http-version :status :res[content-length] :user-agent'))
+app.use(
+  morgan(
+    ':remote-addr - [:date[clf]] :method :url HTTP/:http-version :status :res[content-length] :user-agent',
+    { stream: logger.stream },
+  ),
+)
 
 app.use('/signup', passport.authenticate('jwt', { session: false }), SignupRoutes())
 app.use(

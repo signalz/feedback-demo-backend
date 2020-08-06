@@ -1,27 +1,27 @@
-import winston, { format } from 'winston';
-import DailyRotateFile from 'winston-daily-rotate-file';
-import path from 'path';
-import fs from 'fs';
+import winston, { format } from 'winston'
+import DailyRotateFile from 'winston-daily-rotate-file'
+import path from 'path'
+import fs from 'fs'
 
-const APP_NAME = 'FEEDBACK';
-const LOGS_FOLDER = './logs/';
-const { timestamp, label, printf, combine } = format;
+const APP_NAME = 'FEEDBACK'
+const LOGS_FOLDER = './logs/'
+const { timestamp, label, printf, combine } = format
 
 export const createLogFolder = (logsFolder = './logs/') => {
-  let createdLogFolder = logsFolder;
+  let createdLogFolder = logsFolder
 
   if (!path.isAbsolute(createdLogFolder)) {
-    createdLogFolder = path.resolve(process.cwd(), createdLogFolder);
+    createdLogFolder = path.resolve(process.cwd(), createdLogFolder)
   }
   if (!fs.existsSync(createdLogFolder)) {
-    fs.mkdirSync(createdLogFolder);
+    fs.mkdirSync(createdLogFolder)
   }
 
-  return createdLogFolder;
-};
+  return createdLogFolder
+}
 
 export const configureLogger = ({ logsFolder }) => {
-  const currentLogsFolder = createLogFolder(logsFolder);
+  const currentLogsFolder = createLogFolder(logsFolder)
 
   const currentTransports = [
     new winston.transports.Console({
@@ -40,10 +40,10 @@ export const configureLogger = ({ logsFolder }) => {
       name: `${APP_NAME}-debug`,
       level: 'debug',
     }),
-  ];
+  ]
   const myFormat = printf(
     (info) => `${info.timestamp} [${info.label}] ${info.level}: ${info.message}`,
-  );
+  )
   const logger = winston.createLogger({
     format: combine(
       label({
@@ -53,10 +53,14 @@ export const configureLogger = ({ logsFolder }) => {
       myFormat,
     ),
     transports: currentTransports,
-  });
-  return logger;
-};
+  })
+  logger.stream = {
+    write: (message) => logger.info(message),
+  }
+
+  return logger
+}
 
 export const logger = configureLogger({
   logsFolder: LOGS_FOLDER,
-});
+})
