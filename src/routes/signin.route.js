@@ -7,7 +7,7 @@ const routes = () => {
   const router = express.Router()
   router.post('/', async (req, res) => {
     const { firstName, lastName, username, roles, id } = req.user
-    //clear requestReset (reset password)
+    // clear requestReset (reset password)
     await User.findByIdAndUpdate(
       id,
       {

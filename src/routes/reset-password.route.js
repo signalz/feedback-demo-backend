@@ -7,7 +7,7 @@ import randomKey from 'random-key'
 import StringTemplate from 'string-template'
 
 import { BCRYPT_SALT } from '../config'
-import { BAD_REQUEST, INTERNAL_SERVER_ERROR, USER_DUPLICATED } from '../constants'
+import { BAD_REQUEST, INTERNAL_SERVER_ERROR } from '../constants'
 import { User } from '../models'
 import { logger, getSchemaError } from '../utils'
 import { resetPasswordSchema } from '../schemas'
@@ -76,12 +76,12 @@ const routes = () => {
        </div>
         `,
           {
-            name: user.firstName + " " + user.lastName,
-            username: username,
-            key: key,
+            name: `${user.firstName} ${user.lastName}`,
+            username,
+            key,
           },
         )
-        const info = await transporter.sendMail({
+        await transporter.sendMail({
           from: 'thanh.nguyenkhac@ifisolution.com', // sender address
           to: username, // list of receivers
           subject: 'IFI Solution Feedback: Reset Password', // Subject line
@@ -141,7 +141,6 @@ const routes = () => {
           logger.error(error)
           res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
             message: INTERNAL_SERVER_ERROR,
-            debug: debug,
           })
         }
       })

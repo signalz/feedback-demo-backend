@@ -223,8 +223,7 @@ const routes = () => {
           res.status(HttpStatus.CONFLICT).json({
             message: `${BAD_REQUEST}: Incorrect password!`,
           })
-        }
-        else if (newPassword !== confirmNewPassword) {
+        } else if (newPassword !== confirmNewPassword) {
           res.status(HttpStatus.BAD_REQUEST).json({
             message: `${BAD_REQUEST}: password is not match`,
           })
@@ -235,7 +234,7 @@ const routes = () => {
             })
 
             if (usr) {
-              logger.info(`New password is updated`)
+              logger.info('New password is updated')
               res.status(HttpStatus.OK).send(usr.toJSON())
             } else {
               logger.error(usr)
@@ -257,7 +256,6 @@ const routes = () => {
           message: getSchemaError(error),
         })
       })
-
   })
 
   return router

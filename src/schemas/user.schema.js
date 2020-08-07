@@ -70,7 +70,7 @@ export const resetPasswordSchema = Joi.object({
   key: Joi.string().required(),
   username: Joi.string().custom(validateUsername).required().messages({
     username: INVALID_USERNAME,
-  })
+  }),
 })
 
 export const selfUpdatePasswordSchema = Joi.object({
