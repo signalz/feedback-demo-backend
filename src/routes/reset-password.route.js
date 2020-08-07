@@ -59,15 +59,24 @@ const routes = () => {
           <div style="
              text-align: center;
              margin: 30px 0;
-             "> <a target="_blank" href="https://https://goofy-newton-2a91d6.netlify.app//reset?username={username}&amp;key={key}" style="
-             padding: 10px 20px;
-             color: white;
-             background: rgb(100 185 58);
-             border: none;
-             font-weight: bold;
-             border-radius: 5px;
-             cursor: pointer;
-             ">Reset your password</a></div>
+             ">
+                <a
+                target="_blank"
+                href="https://goofy-newton-2a91d6.netlify.app/reset?username={username}&key={key}"
+                style="
+                color: white;
+                background-color: #64b93a;
+                border: none;
+                font-weight: bold;
+                border-radius: 5px;
+                cursor: pointer;
+                width: 175px;
+                height: 35px;
+                line-height: 32px;
+                display: inline-block;
+                border-radius: 5px;
+                ">Reset your password</a>
+             </div>
           <div>
              If you did not request a password reset, please ignore this email.<br><br>Thanks,<br>IFI Solution
              <div>
