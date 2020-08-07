@@ -1,4 +1,4 @@
-import mongoose, { Schema } from 'mongoose'
+import mongoose, { Schema, SchemaType } from 'mongoose'
 
 import { ROLE_ADMIN, ROLE_SUPERVISOR, ROLE_USER } from '../config'
 
@@ -24,6 +24,12 @@ const schema = Schema({
     type: Boolean,
     default: false,
   },
+  requestReset: [
+    {
+      key: { type: String },
+      expiredAt: { type: String },
+    }
+  ]
 })
 
 schema.method('toJSON', function () {

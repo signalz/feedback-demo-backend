@@ -60,6 +60,19 @@ export const updatePasswordSchema = Joi.object({
   }),
 })
 
+export const resetPasswordSchema = Joi.object({
+  newPassword: Joi.string().custom(validatePassword).required().messages({
+    password: INVALID_PASSWORD,
+  }),
+  confirmNewPassword: Joi.string().custom(validatePassword).required().messages({
+    password: INVALID_PASSWORD,
+  }),
+  key: Joi.string().required(),
+  username: Joi.string().custom(validateUsername).required().messages({
+    username: INVALID_USERNAME,
+  })
+})
+
 export const selfUpdatePasswordSchema = Joi.object({
   password: Joi.string().custom(validatePassword).required().messages({
     password: INVALID_PASSWORD,

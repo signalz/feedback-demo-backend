@@ -8,6 +8,7 @@ import {
   HistoryDashboardRoutes,
   OverviewDashboardRoutes,
   ProjectRoutes,
+  ResetPasswordRoutes,
   SectionRoutes,
   SignupRoutes,
   SigninRoutes,
@@ -57,5 +58,7 @@ app.use(
 )
 
 app.use('/api/users', passport.authenticate('jwt', { session: false }), UserRoutes())
+
+app.use('/api/reset-password', ResetPasswordRoutes())
 
 export default app
