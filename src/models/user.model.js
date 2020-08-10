@@ -24,6 +24,12 @@ const schema = Schema({
     type: Boolean,
     default: false,
   },
+  requestReset: [
+    {
+      key: { type: String },
+      expiredAt: { type: String },
+    },
+  ],
 })
 
 schema.method('toJSON', function () {
