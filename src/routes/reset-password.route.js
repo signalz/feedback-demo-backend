@@ -7,7 +7,7 @@ import randomKey from 'random-key'
 import StringTemplate from 'string-template'
 
 import { BCRYPT_SALT } from '../config'
-import { BAD_REQUEST, INTERNAL_SERVER_ERROR } from '../constants'
+import { BAD_REQUEST, INTERNAL_SERVER_ERROR, MAIL_USER, MAIL_PASSWORD, INSTANTCE } from '../constants'
 import { User } from '../models'
 import { logger, getSchemaError } from '../utils'
 import { resetPasswordSchema } from '../schemas'
@@ -42,8 +42,8 @@ const routes = () => {
           port: 587,
           secure: false, // true for 465, false for other ports
           auth: {
-            user: 'thanh.nguyenkhac@ifisolution.com', // generated ethereal user
-            pass: 'Tkn.2785Tkn.2785', // generated ethereal password
+            user: MAIL_USER, // generated ethereal user
+            pass: MAIL_PASSWORD, // generated ethereal password
           },
         })
 
@@ -62,7 +62,7 @@ const routes = () => {
              ">
                 <a
                 target="_blank"
-                href="https://goofy-newton-2a91d6.netlify.app/reset?username={username}&key={key}"
+                href="{instance}/reset?username={username}&key={key}"
                 style="
                 color: white;
                 background-color: #64b93a;
@@ -85,13 +85,14 @@ const routes = () => {
        </div>
         `,
           {
+            instance: INSTANTCE,
             name: `${user.firstName} ${user.lastName}`,
             username,
             key,
           },
         )
         await transporter.sendMail({
-          from: 'thanh.nguyenkhac@ifisolution.com', // sender address
+          from: MAIL_USER, // sender address
           to: username, // list of receivers
           subject: 'IFI Solution Feedback: Reset Password', // Subject line
           html: htmlTemplate, // lower case username
