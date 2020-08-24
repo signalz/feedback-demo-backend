@@ -1,16 +1,18 @@
 import express from 'express'
 import HttpStatus from 'http-status-codes'
 import mongoose from 'mongoose'
+import lodash from 'lodash'
 
 import { BAD_REQUEST, FORBIDDEN, INTERNAL_SERVER_ERROR } from '../constants'
 import { Feedback, Project } from '../models'
-import { FeedbackSchema } from '../schemas'
+import { createFeedbackSchema, editFeedbackSchema } from '../schemas'
 import { logger, isAdmin, isSupervisor, getSchemaError } from '../utils'
 
 const routes = () => {
   const router = express.Router()
   router.post('/', async (req, res) => {
-    FeedbackSchema.validateAsync(req.body)
+    createFeedbackSchema
+      .validateAsync(req.body)
       .then(async (feedback) => {
         const userId = req.user.id
         const { projectId } = feedback
@@ -29,30 +31,112 @@ const routes = () => {
               message: `${BAD_REQUEST}: project is not found`,
             })
           } else {
+            const matchOps = {}
+            matchOps.projectId = projectId
             if (!isAdmin(req.user)) {
-              if (
-                !project.manager &&
-                !project.associates.includes(mongoose.Types.ObjectId(userId))
-              ) {
-                res.status(HttpStatus.FORBIDDEN).json({
-                  message: FORBIDDEN,
-                })
-              } else if (
-                project.manager.toString() !== userId &&
-                !project.associates.includes(mongoose.Types.ObjectId(userId))
-              ) {
+              if (project.associates.includes(mongoose.Types.ObjectId(userId))) {
+                matchOps.userId = userId
+              } else if (project.manager.toString() !== userId) {
                 res.status(HttpStatus.FORBIDDEN).json({
                   message: FORBIDDEN,
                 })
               }
             }
 
-            const newFeedback = await Feedback.create({
-              userId,
-              ...feedback,
-            })
+            const lastFeedback = {
+              ...(
+                await Feedback.findOne(
+                  matchOps,
+                  {},
+                  {
+                    sort: { createdAt: -1 },
+                  },
+                )
+              ).toObject(),
+            }
 
-            res.status(HttpStatus.OK).send(newFeedback)
+            const newFeedback = {
+              ...(
+                await Feedback.create({
+                  userId,
+                  ...feedback,
+                })
+              ).toObject(),
+            }
+
+            const answersChanged = []
+            /*eslint no-param-reassign: ["error", { "props": false }]*/
+            if (lastFeedback) {
+                newFeedback.sections.forEach((newSection) => {
+                newSection.questions.forEach((question) => {
+                  question.newRating = question.rating
+                })
+              })
+              lastFeedback.sections.forEach((oldSection) => {
+                oldSection.questions.forEach((question) => {
+                  question.oldRating = question.rating
+                })
+              })
+              const mergeFeedback = lodash.merge(lastFeedback, newFeedback)
+              mergeFeedback.sections.forEach((section) => {
+                section.questions.forEach((question) => {
+                  if (question.oldRating && question.newRating) {
+                    let typeChanged = ''
+                    if (question.oldRating < question.newRating) {
+                      typeChanged = 'asc'
+                    }
+                    if (question.oldRating > question.newRating) {
+                      typeChanged = 'des'
+                    }
+                    if (typeChanged) {
+                      const answerChanged = {
+                        question: question.text,
+                        oldPoint: question.oldRating,
+                        newPoint: question.newRating,
+                        typeChanged,
+                        comment: '',
+                      }
+                      answersChanged.push(answerChanged)
+                    }
+                  }
+                })
+              })
+            }
+            const response = { id: newFeedback._id, answersChanged }
+
+            res.status(HttpStatus.OK).send(response)
+          }
+        } catch (error) {
+          logger.error(error)
+          res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+            message: INTERNAL_SERVER_ERROR,
+          })
+        }
+      })
+      .catch((e) => {
+        logger.error(e)
+        res.status(HttpStatus.BAD_REQUEST).json({
+          message: getSchemaError(e),
+        })
+      })
+  })
+
+  // edit feedback (comment answers)
+  router.put('/', async (req, res) => {
+    editFeedbackSchema
+      .validateAsync(req.body)
+      .then(async (feedback) => {
+        const { feedbackId, sections } = feedback
+        try {
+          const update = await Feedback.findByIdAndUpdate(feedbackId, {
+            sections,
+          })
+          if (!update) {
+            res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+              message: INTERNAL_SERVER_ERROR,
+            })
+          } else {
+            res.status(HttpStatus.OK).send(update)
           }
         } catch (error) {
           logger.error(error)
@@ -104,9 +188,11 @@ const routes = () => {
         } else {
           const matchOps = {}
           matchOps.projectId = projectId
-          if (!isAdmin(req.user) &&
+          if (
+            !isAdmin(req.user) &&
             !isSupervisor(req.user) &&
-            !project.views.includes(mongoose.Types.ObjectId(userId))) {
+            !project.views.includes(mongoose.Types.ObjectId(userId))
+          ) {
             matchOps.userId = userId
           }
           const feedback = await Feedback.findOne(
@@ -179,11 +265,13 @@ const routes = () => {
       } else {
         const project = await Project.findById(projectId)
         if (!project.views.includes(mongoose.Types.ObjectId(userId))) {
-          matchOps.userId = userId;
+          matchOps.userId = userId
         }
-        if (!project.manager &&
+        if (
+          !project.manager &&
           !project.associates.includes(mongoose.Types.ObjectId(userId)) &&
-          !project.views.includes(mongoose.Types.ObjectId(userId))) {
+          !project.views.includes(mongoose.Types.ObjectId(userId))
+        ) {
           res.status(HttpStatus.FORBIDDEN).json({
             message: FORBIDDEN,
           })
